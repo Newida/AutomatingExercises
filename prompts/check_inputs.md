@@ -12,7 +12,7 @@ You work inside the solution directory (your current working directory).
 ## What to look for
 
 1. **Files**: every external file a task needs: data sets (CSV, TXT, NPY, images, ...), provided code skeletons or modules, any file the sheet says is "provided", "on eCampus", "attached", "from the website", etc. Use the exact file name the sheet gives. If the sheet needs a file but gives no name, invent a short clear name and say so in `note`.
-2. **Python packages**: every package a task requires or clearly expects (e.g. it says "use PyTorch" or shows `import torch`) that is not already installed. Use the pip name.
+2. **Python packages**: every package you think the solver needs to solve a task properly (the sheet says "use PyTorch", shows `import torch`, or the task is clearly meant for a library) that is not already installed. Use the pip name. The solver cannot install anything, so list it here rather than hope it works out.
 
 Do not list things that the solver can produce itself (plots, its own code, synthetic data the sheet asks to generate) or things defined in the sheet.
 

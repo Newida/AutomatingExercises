@@ -7,7 +7,7 @@ You work inside the solution directory (your current working directory). Everyth
 - `source/sheet.pdf`: the original exercise sheet. This is the only source of truth.
 - `source/sheet.txt`: its text, extracted with `pdftotext -layout` (formulas may be garbled; check against the page images).
 - `source/pages/page-*.png`: one image per page. Look at them (Read tool) whenever a formula, table or figure matters.
-- A Python environment with numpy, scipy, matplotlib, pandas, sympy: run Python as `{python}` (not plain `python3`).
+- One shared Python environment (numpy, scipy, sympy, pandas, matplotlib, seaborn, scikit-learn, jax, torch, torchvision; all CPU): run Python only as `{python}` (never plain `python3`, never another env). Never install packages yourself.
 - `data/`: every external file the sheet needs (data sets, provided code), checked before you started. Read inputs from here.
 - `pdflatex` if you want to check LaTeX.
 - Ignore `agent.log`: it is the log of your own session.
@@ -23,7 +23,7 @@ You work inside the solution directory (your current working directory). Everyth
    - **Check**: how you verified it (numerically, symbolically, by a sanity check, limiting case, etc.).
    - **Pitfalls & takeaways**: typical mistakes, and what the task is meant to teach.
 3. **Code tasks.** Write working, commented Python in `code/` (one file per task or problem, e.g. `code/task_2_1_1.py`), run it with `{python}`, and save plots to `figures/` (PNG). Put the relevant code and the figures (relative links `../figures/...`) into the solution file. Code must actually run; include the outputs you got.
-4. **Inputs.** All required files were collected into `data/` before you started, so normally nothing is missing. Should a task still need something that is not there, never invent results or present fake data as real: write the full code anyway, mark the task `BLOCKED (missing <file>)` and state exactly what must be re-run.
+4. **Inputs.** All required files were collected into `data/` before you started, so normally nothing is missing. Should a task still need something that is not there, never invent results or present fake data as real: write the full code anyway, mark the task `BLOCKED (missing <file>)` and state exactly what must be re-run. The same for packages: if you need one that is not installed, do not work around it with a worse method and do not pip install it; write the code, mark the task `BLOCKED (missing package <name>)`, and list the package at the top of `REPORT.md` under **Missing dependencies** with the install command.
 5. **Self-check.** Re-read every solution against the original statement on the page images. Re-derive or numerically verify each key result. Fix errors.
 6. **Report.** Write `REPORT.md`: a table with one row per task: id, status (`solved` / `partial` / `blocked`), how it was verified, confidence (high/medium/low), notes. Then a list of open questions for the instructor and every assumption you made.
 

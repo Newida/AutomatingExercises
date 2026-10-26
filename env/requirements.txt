@@ -1,0 +1,13 @@
+# The one Python environment every solving agent uses (.venv/).
+# Rebuild with: bin/setup_env    Add a package: append it here, rerun bin/setup_env.
+# csv, json, math, random etc. are in the standard library.
+numpy
+scipy
+sympy
+pandas
+matplotlib
+seaborn
+scikit-learn
+jax[cpu]
+torch          # CPU build (this laptop has no NVIDIA GPU), see bin/setup_env
+torchvision

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Create or update the solver environment .venv/ from env/requirements.txt.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+BASE="${PYTHON:-$HOME/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12}"
+[ -x "$ROOT/.venv/bin/python" ] || "$BASE" -m venv "$ROOT/.venv"
+PIP="$ROOT/.venv/bin/python -m pip"
+$PIP install -q --upgrade pip
+$PIP install -q --extra-index-url https://download.pytorch.org/whl/cpu -r "$ROOT/env/requirements.txt"
+"$ROOT/.venv/bin/python" - <<'PY'
+import numpy, scipy, sympy, pandas, matplotlib, seaborn, sklearn, jax, torch, torchvision, csv
+print("env ok:", "python", __import__("sys").version.split()[0], "| numpy", numpy.__version__,
+      "| jax", jax.__version__, "| torch", torch.__version__, "| pandas", pandas.__version__)
+PY
