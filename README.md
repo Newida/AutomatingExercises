@@ -49,6 +49,22 @@ Setup: the script is `bin/auto_exercises`, symlinked into `~/.local/bin`. All ag
 
 Not built yet: slides, and independent checking of the solutions.
 
+### Phase 3: slides
+
+A fresh agent turns the solutions into slides using the shared template:
+
+- `templates/slides/exslides.sty`: the look (colours, boxes, footer). Change the design only here.
+- `templates/slides/slides.tex`: the skeleton with patterns: title, overview, per problem a divider, per task
+  (1) what is asked, (2) idea, (3) solution steps with `\pause`, (4) code, (5) figure, (6) result + check,
+  (7) pitfalls & takeaway; summary table at the end.
+- `prompts/slides.md`: rules for the slide agent (one thought per slide, words for every step, numbers must
+  match the solutions, doubts go to `NOTES.md`, never invent plots).
+- `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting) and `handout.pdf`
+  (one page per slide, for students); fails on LaTeX errors or leftover `<<placeholders>>`.
+
+Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `handout.pdf`, `NOTES.md` (for the instructor).
+Remake only the slides of an already solved sheet: `auto_exercises sheet.pdf --slides-only`.
+
 ## Input
 
 The pipeline takes exactly one input: **one PDF file that contains all the exercises** (an exercise sheet).

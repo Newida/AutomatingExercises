@@ -1,0 +1,113 @@
+% ======================================================================
+%  Solution slides TEMPLATE.  Copy to slides/slides.tex and fill in.
+%  Every block below is a PATTERN: repeat it per problem / per task.
+%  Replace every <<...>>.  Delete patterns you do not need.
+%  Do not change the preamble or define new colours/macros: the look
+%  lives in exslides.sty and must be identical for every sheet.
+% ======================================================================
+\documentclass[aspectratio=169,11pt,t]{beamer}
+\usepackage{exslides}
+
+\title{<<sheet title, e.g. 1 Data Set, 1 Model, and 6 Training Algorithms>>}
+\subtitle{<<optional subtitle or empty>>}
+\course{<<course, e.g. Principles of Machine Learning (MA-INF 4111), WS 2026/27>>}
+\sheet{<<Exercise 2>>}
+\date{}
+
+\begin{document}
+\makeexercisetitle
+
+% ---------- PATTERN: overview (once) ----------
+\begin{frame}{Overview}
+  \begin{itemize}
+    \item \textbf{Problem <<2.1>>}: <<one line, what is done and why>>
+    \item \textbf{Problem <<2.2>>}: <<...>>
+  \end{itemize}
+  \vfill
+  \begin{takeawaybox}[The big picture]
+    <<one or two sentences: what the whole sheet is meant to teach>>
+  \end{takeawaybox}
+\end{frame}
+
+% ======================================================================
+% ---------- PATTERN: one problem ----------
+\exproblem{<<2.2>>}{<<problem title>>}{<<one sentence: what this problem is about>>}
+
+% ---------- PATTERN: one task (repeat per task) ----------
+\extask{<<2.2.1>>}{<<short task title>>}
+
+% (1) What is asked -- faithful to the sheet, with its notation
+\begin{frame}{Task <<2.2.1>>: what is asked}
+  \begin{taskbox}
+    <<faithful restatement of the task in the sheet's notation>> \sheetref{<<p.~7>>}
+  \end{taskbox}
+  \textbf{Given:} <<data, formulas, starting values>>\par
+  \textbf{Wanted:} <<what the answer must contain>>
+\end{frame}
+
+% (2) The idea -- why this approach is the natural one
+\begin{frame}{Task <<2.2.1>>: idea}
+  \begin{ideabox}
+    <<the approach in 1--3 sentences and why it is the natural one>>
+  \end{ideabox}
+  \keyeq{<<the one formula to remember>>}
+\end{frame}
+
+% (3) Solution steps -- one idea per slide, \pause between steps
+\begin{frame}{Task <<2.2.1>>: solution}
+  \exstep{1}{<<first step in words>>}
+  \[ <<formula>> \]
+  \pause
+  \exstep{2}{<<next step, with the justification>>}
+  \[ <<formula>> \]
+\end{frame}
+
+% (4) Code (only for programming tasks) -- the essential lines, not the whole file
+\begin{frame}[fragile]{Task <<2.2.1>>: code}
+\begin{lstlisting}
+<<10--25 essential lines from code/...py>>
+\end{lstlisting}
+  {\footnotesize\color{exgray}Full code: \texttt{code/<<file>>.py}}
+\end{frame}
+
+% (5) Figure (only if the task has one)
+\begin{frame}{Task <<2.2.1>>: <<what the plot shows>>}
+  \exfigure{<<task_2_2_2_newton_fit.png>>}{<<one sentence: what to look at>>}
+\end{frame}
+
+% (6) Result + how we know it is right
+\begin{frame}{Task <<2.2.1>>: result}
+  \begin{resultbox}
+    <<final answer, e.g. $\alpha \approx 2.81$, $\beta \approx 215.4$>>
+  \end{resultbox}
+  \begin{checkbox}
+    <<how it was verified: sanity check, limiting case, second method>>
+  \end{checkbox}
+\end{frame}
+
+% (7) Pitfalls & takeaway (may be merged into (6) if short)
+\begin{frame}{Task <<2.2.1>>: pitfalls \& takeaway}
+  \begin{pitfallbox}
+    <<typical mistake and how to avoid it>>
+  \end{pitfallbox}
+  \begin{takeawaybox}
+    <<what this task is meant to teach>>
+  \end{takeawaybox}
+\end{frame}
+% ---------- end PATTERN task ----------
+
+% ======================================================================
+% ---------- PATTERN: summary (once, at the end) ----------
+\begin{frame}{Summary}
+  \begin{table}\centering\small
+  \begin{tabular}{lll}\toprule
+    Task & Method & Result \\\midrule
+    <<2.2.1>> & <<Newton MLE>> & <<$\alpha=2.81,\ \beta=215.4$>> \\
+    \bottomrule
+  \end{tabular}\end{table}
+  \begin{takeawaybox}
+    <<the main lesson of the sheet>>
+  \end{takeawaybox}
+\end{frame}
+
+\end{document}

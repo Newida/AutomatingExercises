@@ -6,6 +6,9 @@ from pathlib import Path
 ROOT = Path(os.path.realpath(__file__)).parent.parent
 PROMPT = ROOT / "prompts" / "solve.md"
 CHECK_PROMPT = ROOT / "prompts" / "check_inputs.md"
+SLIDES_PROMPT = ROOT / "prompts" / "slides.md"
+TEMPLATE = ROOT / "templates" / "slides"
+BUILD = ROOT / "bin" / "build_slides"
 WAITING = "WAITING_FOR_INPUTS"  # marker file: input check failed, folder may be reused
 VENV_PY = ROOT / ".venv" / "bin" / "python"
 
@@ -159,17 +162,40 @@ def check_inputs(out, pdf, data_dirs, model):
     sys.exit(2)
 
 
+def make_slides(out, model):
+    """Copy the slide template into out/slides, let an agent fill it, then build and check the PDFs."""
+    sl = out / "slides"
+    if sl.exists():
+        shutil.rmtree(sl)
+    sl.mkdir()
+    for f in ("slides.tex", "exslides.sty"):
+        shutil.copy2(TEMPLATE / f, sl / f)
+    prompt = SLIDES_PROMPT.read_text().replace("{build}", str(BUILD))
+    (out / "source" / "slides_prompt.md").write_text(prompt)
+    print("auto_exercises: making slides from the solutions (log in slides.log) ...")
+    rc = run_claude(out, prompt, model, "slides.log")
+    if rc:
+        stop(f"slide agent exited with code {rc}; see {out / 'slides.log'}")
+    b = subprocess.run([str(BUILD), str(sl)], capture_output=True, text=True)
+    print(b.stdout, end="")
+    if b.returncode:
+        stop(f"slides do not build cleanly; see {sl / 'build'}")
+    print(f"auto_exercises: slides: {sl / 'slides.pdf'}\n  handout: {sl / 'handout.pdf'}\n  notes: {sl / 'NOTES.md'}")
+
+
 def main():
     ap = argparse.ArgumentParser(
         prog="auto_exercises",
         description="Solve every exercise on a sheet with an AI agent. "
                     "Creates <sheet>_solutions/ next to the PDF with exercises.md, "
-                    "solutions/, code/, figures/ and REPORT.md.")
+                    "solutions/, code/, figures/, REPORT.md and slides/ (slides.pdf, handout.pdf).")
     ap.add_argument("pdf", help="path to the exercise sheet PDF")
     ap.add_argument("--model", help="Claude model (default: Claude Code's default)")
     ap.add_argument("--force", action="store_true", help="replace an existing solution directory")
     ap.add_argument("--data", action="append", default=[], metavar="DIR",
                     help="extra folder to search for data files the sheet needs (repeatable)")
+    ap.add_argument("--slides-only", action="store_true",
+                    help="only (re)make the slides from an existing, solved solution directory")
     ap.add_argument("--dry-run", action="store_true", help="prepare the directory and print the prompt, but do not start the agent")
     a = ap.parse_args()
 
@@ -189,6 +215,11 @@ def main():
         stop("claude CLI not found on PATH")
 
     out = pdf.parent / f"{pdf.stem}_solutions"
+    if a.slides_only:
+        if not (out / "REPORT.md").exists():
+            stop(f"{out} is not solved yet (no REPORT.md); run without --slides-only first")
+        make_slides(out, a.model)
+        return
     n = prepare(pdf, out, a.force)
     prompt = PROMPT.read_text().replace("{python}", str(VENV_PY))
     (out / "source" / "prompt.md").write_text(prompt)
@@ -207,7 +238,9 @@ def main():
         stop(f"agent exited with code {rc}; see {out / 'agent.log'}")
     if not (out / "REPORT.md").exists():
         stop(f"agent finished without REPORT.md; see {out / 'agent.log'}")
-    print(f"\nauto_exercises: done. Solutions: {out}\n  report: {out / 'REPORT.md'}")
+    print(f"auto_exercises: solved. Report: {out / 'REPORT.md'}")
+    make_slides(out, a.model)
+    print(f"\nauto_exercises: done. Everything in {out}")
 
 
 if __name__ == "__main__":
