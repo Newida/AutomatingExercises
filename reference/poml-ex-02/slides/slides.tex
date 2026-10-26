@@ -110,18 +110,6 @@ Squares: positive and negative errors do not cancel, $S$ is differentiable, and 
 If $m$ is \textbf{linear} in $\bm\theta$: set $\nabla S=0$, closed form. If not: iterate.
 \end{frame}
 
-\begin{frame}{Refresher: a pdf does not have the size of the counts}
-\Refresh
-\begin{enumerate}
-\item A pdf has area $1$. With bins of width $1$: \quad $\sum_{t=1}^n f(t\mid\alpha,\beta)\approx1$
-\item The counts add up to \quad $C=\sum_{t=1}^n c_t=17293$
-\item So $f$ alone is far too small to lie on the data. A count curve needs a factor:
-\[c_t\approx A\cdot f(t\mid\alpha,\beta),\qquad A\approx C\]
-\item In 2.2 we fixed $A=C$ \emph{after} the fit. Now $A$ becomes a \textbf{third parameter}.
-\end{enumerate}
-\end{frame}
-
-
 % =====================================================================
 \section{Problem 2.1: recap of the task}
 
