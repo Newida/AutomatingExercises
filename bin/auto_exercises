@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+"""auto_exercises: exercise sheet PDF -> solution directory, solved by an agent."""
+import argparse, json, os, shutil, subprocess, sys, time
+from pathlib import Path
+
+ROOT = Path(os.path.realpath(__file__)).parent.parent
+PROMPT = ROOT / "prompts" / "solve.md"
+VENV_PY = ROOT / ".venv" / "bin" / "python"
+
+
+def stop(msg, code=1):
+    print(f"auto_exercises: STOP: {msg}", file=sys.stderr)
+    sys.exit(code)
+
+
+def prepare(pdf, out, force):
+    if out.exists():
+        if not force:
+            stop(f"{out} already exists (use --force to replace it)")
+        shutil.rmtree(out)
+    src = out / "source"
+    (src / "pages").mkdir(parents=True)
+    for d in ("solutions", "code", "figures"):
+        (out / d).mkdir()
+    shutil.copy2(pdf, src / "sheet.pdf")
+    for cmd in (["pdftotext", "-layout", str(src / "sheet.pdf"), str(src / "sheet.txt")],
+                ["pdftoppm", "-r", "110", "-png", str(src / "sheet.pdf"), str(src / "pages" / "page")]):
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode:
+            stop(f"{cmd[0]} failed: {r.stderr.strip()}")
+    pages = sorted((src / "pages").glob("*.png"))
+    text = (src / "sheet.txt").read_text(errors="replace")
+    if len(text.split()) < 20:
+        print("auto_exercises: warning: almost no text extracted (scanned PDF?); the agent will rely on page images.")
+    return len(pages)
+
+
+def short(s, n=110):
+    s = " ".join(str(s).split())
+    return s if len(s) <= n else s[: n - 1] + "…"
+
+
+def show(event, t0):
+    """Print a one-line progress message for an agent stream-json event."""
+    stamp = time.strftime("%M:%S", time.gmtime(time.time() - t0))
+    if event.get("type") == "assistant":
+        for c in event.get("message", {}).get("content", []):
+            if c.get("type") == "text" and c.get("text", "").strip():
+                print(f"[{stamp}] {short(c['text'])}", flush=True)
+            elif c.get("type") == "tool_use":
+                inp = c.get("input", {})
+                arg = inp.get("file_path") or inp.get("command") or inp.get("description") or ""
+                print(f"[{stamp}]   -> {c.get('name')}: {short(arg, 90)}", flush=True)
+    elif event.get("type") == "result":
+        cost = event.get("total_cost_usd")
+        print(f"[{stamp}] agent finished ({event.get('subtype')}, {event.get('num_turns')} turns"
+              + (f", ~${cost:.2f} API-equivalent" if cost else "") + ")", flush=True)
+
+
+def run_claude(out, prompt, model):
+    cmd = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose",
+           "--permission-mode", "bypassPermissions",
+           "--disallowedTools", "WebFetch", "WebSearch"]
+    if model:
+        cmd += ["--model", model]
+    t0 = time.time()
+    with open(out / "agent.log", "w") as log:
+        p = subprocess.Popen(cmd, cwd=out, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        try:
+            for line in p.stdout:
+                log.write(line); log.flush()
+                try:
+                    show(json.loads(line), t0)
+                except json.JSONDecodeError:
+                    print(short(line), flush=True)
+            return p.wait()
+        except KeyboardInterrupt:
+            p.terminate(); p.wait()
+            stop(f"interrupted; partial results in {out}", 130)
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog="auto_exercises",
+        description="Solve every exercise on a sheet with an AI agent. "
+                    "Creates <sheet>_solutions/ next to the PDF with exercises.md, "
+                    "solutions/, code/, figures/ and REPORT.md.")
+    ap.add_argument("pdf", help="path to the exercise sheet PDF")
+    ap.add_argument("--model", help="Claude model (default: Claude Code's default)")
+    ap.add_argument("--force", action="store_true", help="replace an existing solution directory")
+    ap.add_argument("--dry-run", action="store_true", help="prepare the directory and print the prompt, but do not start the agent")
+    a = ap.parse_args()
+
+    pdf = Path(a.pdf).expanduser().resolve()
+    if not pdf.is_file():
+        stop(f"no such file: {a.pdf}")
+    if pdf.suffix.lower() != ".pdf":
+        stop(f"not a PDF: {a.pdf}")
+    info = subprocess.run(["pdfinfo", str(pdf)], capture_output=True, text=True)
+    if info.returncode:
+        stop(f"cannot read PDF: {info.stderr.strip()}")
+    if "Encrypted:       yes" in info.stdout:
+        stop("PDF is encrypted")
+    if not VENV_PY.exists():
+        stop(f"Python environment missing: {VENV_PY}")
+    if not a.dry_run and not shutil.which("claude"):
+        stop("claude CLI not found on PATH")
+
+    out = pdf.parent / f"{pdf.stem}_solutions"
+    n = prepare(pdf, out, a.force)
+    prompt = PROMPT.read_text().replace("{python}", str(VENV_PY))
+    (out / "source" / "prompt.md").write_text(prompt)
+    print(f"auto_exercises: {pdf.name}: {n} pages -> {out}")
+    if a.dry_run:
+        print(prompt)
+        return
+    print("auto_exercises: starting agent (Ctrl-C to abort; full log in agent.log)")
+    rc = run_claude(out, prompt, a.model)
+    if rc:
+        stop(f"agent exited with code {rc}; see {out / 'agent.log'}")
+    if not (out / "REPORT.md").exists():
+        stop(f"agent finished without REPORT.md; see {out / 'agent.log'}")
+    print(f"\nauto_exercises: done. Solutions: {out}\n  report: {out / 'REPORT.md'}")
+
+
+if __name__ == "__main__":
+    main()
