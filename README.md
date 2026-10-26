@@ -23,7 +23,7 @@ auto_exercises path/to/sheet.pdf
 - On success the script prints where the slides are; if it stops (see "When the pipeline stops"), it prints the reason and exits with a non-zero code.
 - `auto_exercises --help` explains the usage.
 
-## Current state (stage 1: solving)
+## Current state (solve, then slides)
 
 `auto_exercises sheet.pdf` runs in two phases.
 
@@ -47,7 +47,6 @@ Options: `--model`, `--data DIR` (repeatable), `--force` (start over), `--dry-ru
 
 Setup: the script is `bin/auto_exercises`, symlinked into `~/.local/bin`. All agents use one Python environment, `.venv/` (Python 3.12; numpy, scipy, sympy, pandas, matplotlib, seaborn, scikit-learn, jax, torch, torchvision, CPU only; `csv` is built in). It is defined in `env/requirements.txt` and built by `bin/setup_env`. Agents never install packages: the input check complains about missing ones before solving, and a solver that still finds one missing marks the task `BLOCKED (missing package ...)` and lists it under **Missing dependencies** in `REPORT.md`. To add a package: append it to `env/requirements.txt` and run `bin/setup_env`.
 
-Not built yet: slides, and independent checking of the solutions.
 
 ### Phase 3: slides
 
@@ -64,6 +63,8 @@ A fresh agent turns the solutions into slides using the shared template:
 
 Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `handout.pdf`, `NOTES.md` (for the instructor).
 Remake only the slides of an already solved sheet: `auto_exercises sheet.pdf --slides-only`.
+
+Not built yet: independent checking of the solutions.
 
 ## Input
 
