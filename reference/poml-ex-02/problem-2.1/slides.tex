@@ -16,6 +16,7 @@
 \newcommand{\Algo}{\stage{algo}{Step 2 -- algorithm}}
 \newcommand{\Impl}{\stage{impl}{Step 3 -- implementation}}
 \newcommand{\Given}{\stage{given}{Recap}}
+\newcommand{\Refresh}{\stage{given}{Refresher}}
 
 \title{Exercise 2 -- Problem 2.1: setting the stage}
 \subtitle{Principles of Machine Learning (MA-INF 4111), WS 2026/27}
@@ -25,6 +26,7 @@
 
 \begin{frame}{Roadmap}
 \begin{enumerate}
+\item \textbf{Refresher}: fitting a model to data; pdf, cdf and how they relate
 \item \textbf{Recap of the task}: what is given, which background we need, what we must do
 \item \textbf{Task 2.1.1}: load and plot the myspace data
 \item \textbf{Mini exercise}: show $f=\mathrm dF/\mathrm dt$ for the Weibull
@@ -33,6 +35,84 @@
 \bigskip
 Every solution follows the same three steps:\\[3pt]
 \textcolor{hand}{\textbf{by hand}} \;$\to$\; \textcolor{algo}{\textbf{algorithm}} \;$\to$\; \textcolor{impl}{\textbf{implementation}}
+\end{frame}
+
+% =====================================================================
+\section{Refresher: what you should remember}
+
+\begin{frame}{The big picture: fitting a model to data}\small
+\Refresh
+The whole sheet fits \textbf{one model} to \textbf{one data set} in six different ways. Every fit has four steps:
+\begin{enumerate}
+\item \textbf{Data:} observations, here weekly search counts $c_t$ at weeks $t=1,\dots,n$
+\item \textbf{Model:} a family of curves with a few \emph{parameters}, here $f(t\mid\alpha,\beta)$
+\item \textbf{Fit:} choose the parameters so that the curve matches the data as well as possible\\
+\quad Problems 2.2--2.6: maximum likelihood, least squares, \dots; 2.7--2.8: ODEs, neural networks
+\item \textbf{Interpret:} what do the fitted $\alpha,\beta$ say about the data?
+\end{enumerate}
+\medskip
+\textbf{Problem 2.1 prepares steps 1 and 2:} load the data, implement the model.\\
+The model is a \textbf{pdf} (with its \textbf{cdf}). To interpret a fit, you need to know what these are.
+\end{frame}
+
+\begin{frame}{Refresher: probability density function (pdf)}
+\Refresh
+Let $T$ be a \textbf{continuous random variable} with values in $[0,\infty)$.
+\begin{enumerate}
+\item A \textbf{pdf} is a function $f$ with \quad $f(t)\ge0$ \quad and \quad $\displaystyle\int_0^\infty f(t)\,\mathrm dt=1$
+\item \textbf{Probability is area} under $f$:
+\[P(a\le T\le b)=\int_a^b f(t)\,\mathrm dt\]
+\item $f(t)$ itself is \textbf{not} a probability: $P(T=t)=0$, and $f(t)$ may exceed $1$.\\
+It is probability \emph{per unit of $t$}: for a short interval $\Delta t$,
+\[P(t\le T\le t+\Delta t)\approx f(t)\,\Delta t\]
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Refresher: cumulative distribution function (cdf)}
+\Refresh
+\begin{enumerate}
+\item The \textbf{cdf} accumulates probability up to $t$:
+\[F(t)=P(T\le t)=\int_0^t f(s)\,\mathrm ds\]
+\item Properties: $F(0)=0$,\quad $F$ never decreases,\quad $F(t)\to1$ for $t\to\infty$
+\item Interval probabilities need no integral any more:
+\[P(a<T\le b)=F(b)-F(a)\]
+\item Quantiles: the \textbf{median} $t_{1/2}$ solves $F(t_{1/2})=\tfrac12$
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Refresher: how pdf and cdf belong together}\small
+\Refresh
+\centering
+\includegraphics[width=.6\linewidth]{figures/refresher_pdf_cdf.png}
+\[
+F(t)=\int_0^t f(s)\,\mathrm ds
+\quad\Longleftrightarrow\quad
+f(t)=\frac{\mathrm dF}{\mathrm dt}(t)
+\qquad\text{(fundamental theorem of calculus)}
+\]
+\raggedright
+\begin{itemize}
+\item Area under $f$ up to $t_0$ $=$ height of $F$ at $t_0$. $f\to F$: integrate; $F\to f$: differentiate
+\item The mini exercise checks exactly this relation for the Weibull
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Refresher: what pdf and cdf mean for myspace}\small
+\Refresh
+\begin{enumerate}
+\item \textbf{Random variable:} $T$ = the week of a randomly picked search from all recorded searches
+\item \textbf{Data as a density:} divide by the total, $p_t=c_t/\sum_s c_s$ \;(here $\sum c=17293$).\\
+Then $\sum_t p_t=1$ and, with $\Delta t=1$ week, $p_t\approx f(t)$.
+\item \textbf{Reading a fit:}
+  \begin{itemize}
+  \item $f(t)$: share of all searches that fall in week $t$
+  \item $F(t)$: share of all searches made up to week $t$
+  \end{itemize}
+\item \textbf{Scale:} $f$ is tiny (peak of $p_t$: $100/17293\approx0.006$). To draw the fit over the raw counts,
+plot $\big(\sum c\big)\cdot f(t)$, not $f(t)$
+\item \textbf{Example:} $F(\beta)=1-e^{-1}\approx0.63$ for every $\alpha$\\
+$\Rightarrow$ $\beta$ is the week by which $63\%$ of all myspace searches had happened
+\end{enumerate}
 \end{frame}
 
 % =====================================================================
@@ -305,6 +385,7 @@ Right ($\alpha=2.5$): larger $\beta$ = wider and lower, same area.
 
 \begin{frame}{Takeaways}
 \begin{itemize}
+\item The sheet fits one model to data; the model is a pdf, so its fit is read as shares of all searches
 \item Choose a model because it fits the data's \textbf{shape} (skewed rise and fall), not because it is easy
 \item The Weibull has a built-in growth term minus a decline term, see (5)
 \item $\alpha$ sets the form, $\beta$ only stretches time
