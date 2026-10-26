@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """auto_exercises: exercise sheet PDF -> solution directory, solved by an agent."""
-import argparse, json, os, shutil, subprocess, sys, time
+import argparse, hashlib, json, os, shutil, subprocess, sys, time
 from pathlib import Path
 
 ROOT = Path(os.path.realpath(__file__)).parent.parent
 PROMPT = ROOT / "prompts" / "solve.md"
+CHECK_PROMPT = ROOT / "prompts" / "check_inputs.md"
+WAITING = "WAITING_FOR_INPUTS"  # marker file: input check failed, folder may be reused
 VENV_PY = ROOT / ".venv" / "bin" / "python"
 
 
@@ -13,8 +15,16 @@ def stop(msg, code=1):
     sys.exit(code)
 
 
+def same_sheet(pdf, out):
+    old = out / "source" / "sheet.pdf"
+    return old.is_file() and hashlib.sha256(old.read_bytes()).digest() == hashlib.sha256(pdf.read_bytes()).digest()
+
+
 def prepare(pdf, out, force):
+    """Create the folder. Returns None if an existing folder waiting for inputs is reused."""
     if out.exists():
+        if not force and (out / WAITING).exists() and same_sheet(pdf, out):
+            return None
         if not force:
             stop(f"{out} already exists (use --force to replace it)")
         shutil.rmtree(out)
@@ -57,14 +67,14 @@ def show(event, t0):
               + (f", ~${cost:.2f} API-equivalent" if cost else "") + ")", flush=True)
 
 
-def run_claude(out, prompt, model):
+def run_claude(out, prompt, model, logname="agent.log"):
     cmd = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose",
            "--permission-mode", "bypassPermissions",
            "--disallowedTools", "WebFetch", "WebSearch"]
     if model:
         cmd += ["--model", model]
     t0 = time.time()
-    with open(out / "agent.log", "w") as log:
+    with open(out / logname, "w") as log:
         p = subprocess.Popen(cmd, cwd=out, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         try:
             for line in p.stdout:
@@ -79,6 +89,76 @@ def run_claude(out, prompt, model):
             stop(f"interrupted; partial results in {out}", 130)
 
 
+def installed_packages():
+    r = subprocess.run([str(VENV_PY), "-m", "pip", "list", "--format=json"], capture_output=True, text=True)
+    return sorted(p["name"].lower() for p in json.loads(r.stdout or "[]"))
+
+
+def find_file(name, dirs):
+    """Look for a file by name (case-insensitive): top level of the sheet's folder, anywhere below data dirs."""
+    for d, deep in dirs:
+        if not d.is_dir():
+            continue
+        for f in (d.rglob("*") if deep else d.iterdir()):
+            if f.is_file() and f.name.lower() == name.lower():
+                return f
+    return None
+
+
+def check_inputs(out, pdf, data_dirs, model):
+    """Ask an agent what the sheet needs, then check it is all there. Stops (exit 2) with a list if not."""
+    req_file = out / "source" / "requirements.json"
+    if not req_file.exists():
+        print("auto_exercises: checking what the sheet needs (data files, packages) ...")
+        prompt = (CHECK_PROMPT.read_text().replace("{python}", str(VENV_PY))
+                  .replace("{packages}", ", ".join(installed_packages())))
+        rc = run_claude(out, prompt, model, "check.log")
+        if rc or not req_file.exists():
+            stop(f"input check failed (rc={rc}); see {out / 'check.log'}")
+    try:
+        req = json.loads(req_file.read_text())
+        files, pkgs = req.get("files", []), req.get("packages", [])
+    except (json.JSONDecodeError, AttributeError) as e:
+        stop(f"bad {req_file}: {e}")
+
+    dirs = [(pdf.parent, False), (pdf.parent / f"{pdf.stem}_data", True)] + [(d, True) for d in data_dirs]
+    found, missing = {}, []
+    for f in files:
+        hit = find_file(f["name"], dirs)
+        (found.__setitem__(f["name"], hit) if hit else missing.append(f))
+    have = set(installed_packages())
+    missing_pkgs = [p for p in pkgs if p["name"].lower().replace("_", "-") not in have]
+
+    for name, path in found.items():
+        print(f"  ok   {name}  ({path})")
+    for p in pkgs:
+        if p not in missing_pkgs:
+            print(f"  ok   python package {p['name']}")
+    if not missing and not missing_pkgs:
+        (out / WAITING).unlink(missing_ok=True)
+        (out / "data").mkdir(exist_ok=True)
+        for name, path in found.items():
+            shutil.copy2(path, out / "data" / name)
+        print(f"auto_exercises: all inputs present ({len(files)} files, {len(pkgs)} packages).")
+        return
+
+    (out / WAITING).write_text("Input check failed; rerun auto_exercises once the inputs are there.\n")
+    print("\nauto_exercises: STOP: the sheet needs things I do not have. Nothing has been solved yet.\n", file=sys.stderr)
+    for f in missing:
+        print(f"  MISSING file {f['name']}  (tasks {', '.join(f.get('tasks') or ['?'])}): {f.get('what') or ''}", file=sys.stderr)
+        if f.get("where"):
+            print(f"      sheet says: {f['where']}", file=sys.stderr)
+        if f.get("note"):
+            print(f"      note: {f['note']}", file=sys.stderr)
+    for p in missing_pkgs:
+        print(f"  MISSING python package {p['name']}  (tasks {', '.join(p.get('tasks') or ['?'])}): {p.get('why') or ''}", file=sys.stderr)
+    print(f"\nPut the files next to the PDF, in {pdf.parent / (pdf.stem + '_data')}/, or pass --data DIR.", file=sys.stderr)
+    if missing_pkgs:
+        print(f"Install packages with: {VENV_PY.parent / 'pip'} install " + " ".join(p["name"] for p in missing_pkgs), file=sys.stderr)
+    print(f"Then rerun the same command. (Wrong list? Edit {req_file}, or --force to check from scratch.)", file=sys.stderr)
+    sys.exit(2)
+
+
 def main():
     ap = argparse.ArgumentParser(
         prog="auto_exercises",
@@ -88,6 +168,8 @@ def main():
     ap.add_argument("pdf", help="path to the exercise sheet PDF")
     ap.add_argument("--model", help="Claude model (default: Claude Code's default)")
     ap.add_argument("--force", action="store_true", help="replace an existing solution directory")
+    ap.add_argument("--data", action="append", default=[], metavar="DIR",
+                    help="extra folder to search for data files the sheet needs (repeatable)")
     ap.add_argument("--dry-run", action="store_true", help="prepare the directory and print the prompt, but do not start the agent")
     a = ap.parse_args()
 
@@ -110,10 +192,15 @@ def main():
     n = prepare(pdf, out, a.force)
     prompt = PROMPT.read_text().replace("{python}", str(VENV_PY))
     (out / "source" / "prompt.md").write_text(prompt)
-    print(f"auto_exercises: {pdf.name}: {n} pages -> {out}")
+    if n is None:
+        print(f"auto_exercises: {pdf.name}: reusing {out} (was waiting for inputs)")
+    else:
+        print(f"auto_exercises: {pdf.name}: {n} pages -> {out}")
     if a.dry_run:
         print(prompt)
         return
+    check_inputs(out, pdf, [Path(d).expanduser().resolve() for d in a.data], a.model)
+    print("auto_exercises: solving; no human in the loop from here on.")
     print("auto_exercises: starting agent (Ctrl-C to abort; full log in agent.log)")
     rc = run_claude(out, prompt, a.model)
     if rc:

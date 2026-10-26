@@ -2,3 +2,5 @@
 *_solutions/
 *.pdf
 __pycache__/
+*_data/
+*.csv

@@ -8,6 +8,7 @@ You work inside the solution directory (your current working directory). Everyth
 - `source/sheet.txt`: its text, extracted with `pdftotext -layout` (formulas may be garbled; check against the page images).
 - `source/pages/page-*.png`: one image per page. Look at them (Read tool) whenever a formula, table or figure matters.
 - A Python environment with numpy, scipy, matplotlib, pandas, sympy: run Python as `{python}` (not plain `python3`).
+- `data/`: every external file the sheet needs (data sets, provided code), checked before you started. Read inputs from here.
 - `pdflatex` if you want to check LaTeX.
 - Ignore `agent.log`: it is the log of your own session.
 
@@ -22,7 +23,7 @@ You work inside the solution directory (your current working directory). Everyth
    - **Check**: how you verified it (numerically, symbolically, by a sanity check, limiting case, etc.).
    - **Pitfalls & takeaways**: typical mistakes, and what the task is meant to teach.
 3. **Code tasks.** Write working, commented Python in `code/` (one file per task or problem, e.g. `code/task_2_1_1.py`), run it with `{python}`, and save plots to `figures/` (PNG). Put the relevant code and the figures (relative links `../figures/...`) into the solution file. Code must actually run; include the outputs you got.
-4. **Missing inputs.** If a task needs a file that is not in the PDF (e.g. a data set), never invent results and never present fake data as real. Write the full code anyway; if useful, demonstrate it on clearly labelled synthetic data; mark the task as `BLOCKED (missing <file>)` and state exactly which results must be re-run once the file is available.
+4. **Inputs.** All required files were collected into `data/` before you started, so normally nothing is missing. Should a task still need something that is not there, never invent results or present fake data as real: write the full code anyway, mark the task `BLOCKED (missing <file>)` and state exactly what must be re-run.
 5. **Self-check.** Re-read every solution against the original statement on the page images. Re-derive or numerically verify each key result. Fix errors.
 6. **Report.** Write `REPORT.md`: a table with one row per task: id, status (`solved` / `partial` / `blocked`), how it was verified, confidence (high/medium/low), notes. Then a list of open questions for the instructor and every assumption you made.
 

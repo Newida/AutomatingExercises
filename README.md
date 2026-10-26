@@ -25,24 +25,29 @@ auto_exercises path/to/sheet.pdf
 
 ## Current state (stage 1: solving)
 
-`auto_exercises sheet.pdf` currently does:
+`auto_exercises sheet.pdf` runs in two phases.
 
-1. Checks the PDF (exists, readable, not encrypted).
-2. Creates `sheet_solutions/` next to the PDF. It refuses if the folder already exists; `--force` replaces it.
-3. Puts the original PDF, its extracted text (`pdftotext -layout`) and one PNG per page into `source/`.
-4. Starts a Claude Code agent (`claude -p`, no web access) in that folder with `prompts/solve.md`, and prints its progress. The full log goes to `agent.log`.
-5. The agent writes:
+**Phase 1: check inputs. It complains until it has everything.**
+
+1. Checks the PDF (exists, readable, not encrypted) and creates `sheet_solutions/` next to it (with the PDF, its text and one PNG per page in `source/`).
+2. A short agent run (`prompts/check_inputs.md`, log `check.log`) reads the sheet and writes `source/requirements.json`: every external file the tasks need (data sets, provided code), with the tasks that use it and where the sheet says to get it, plus every Python package the sheet expects that is not installed.
+3. The script then checks this list. It looks for files next to the PDF, anywhere in `sheet_data/` and in any `--data DIR`, and checks packages in `.venv`.
+4. If anything is missing it stops with exit code 2 and lists what is missing, which tasks need it and how to fix it. Nothing is solved yet. Rerun the same command once the inputs are there: the folder and the list are reused, so the check does not run again. If the list is wrong, edit `requirements.json`, or start over with `--force`.
+
+**Phase 2: solve. No human in the loop.**
+
+5. All found files are copied into `data/`. Then a Claude Code agent (`claude -p`, no web access, `prompts/solve.md`) solves everything without asking questions, logging to `agent.log`. It writes:
    - `exercises.md`: a list of every problem and task, with source pages
    - `solutions/problem-X.md`: for each task: idea, step-by-step solution, result, check, pitfalls and takeaways
    - `code/` and `figures/`: runnable Python and the plots it makes
    - `REPORT.md`: status per task (solved/partial/blocked), how it was checked, confidence, and open questions
 6. Exits with code 0 only if the agent finished and wrote `REPORT.md`.
 
-Options: `--model`, `--force`, `--dry-run` (prepare the folder and print the prompt without starting the agent).
+Options: `--model`, `--data DIR` (repeatable), `--force` (start over), `--dry-run` (prepare the folder and print the prompt without starting an agent).
 
 Setup: the script is `bin/auto_exercises`, symlinked into `~/.local/bin`. The agent runs Python from `.venv/` (numpy, scipy, matplotlib, pandas, sympy).
 
-Not built yet: slides, independent checking of the solutions, and supplied data files (a task that needs a missing file, e.g. a CSV, is marked `BLOCKED`).
+Not built yet: slides, and independent checking of the solutions.
 
 ## Input
 
