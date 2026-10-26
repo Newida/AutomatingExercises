@@ -97,24 +97,6 @@ f(t)=\frac{\mathrm dF}{\mathrm dt}(t)
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Refresher: what pdf and cdf mean for myspace}\small
-\Refresh
-\begin{enumerate}
-\item \textbf{Random variable:} $T$ = the week of a randomly picked search from all recorded searches
-\item \textbf{Data as a density:} divide by the total, $p_t=c_t/\sum_s c_s$ \;(here $\sum c=17293$).\\
-Then $\sum_t p_t=1$ and, with $\Delta t=1$ week, $p_t\approx f(t)$.
-\item \textbf{Reading a fit:}
-  \begin{itemize}
-  \item $f(t)$: share of all searches that fall in week $t$
-  \item $F(t)$: share of all searches made up to week $t$
-  \end{itemize}
-\item \textbf{Scale:} $f$ is tiny (peak of $p_t$: $100/17293\approx0.006$). To draw the fit over the raw counts,
-plot $\big(\sum c\big)\cdot f(t)$, not $f(t)$
-\item \textbf{Example:} $F(\beta)=1-e^{-1}\approx0.63$ for every $\alpha$\\
-$\Rightarrow$ $\beta$ is the week by which $63\%$ of all myspace searches had happened
-\end{enumerate}
-\end{frame}
-
 % =====================================================================
 \section{Recap of the task}
 
