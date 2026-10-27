@@ -22,9 +22,9 @@ You work inside the solution directory (your current working directory). Everyth
    - **Result**: the final answer, clearly marked.
    - **Check**: how you verified it (numerically, symbolically, by a sanity check, limiting case, etc.).
    - **Pitfalls & takeaways**: typical mistakes, and what the task is meant to teach.
-3. **Code tasks.** Write working, commented Python in `code/` (one file per task or problem, e.g. `code/task_2_1_1.py`), run it with `{python}`, and save plots to `figures/` (PNG). Put the relevant code and the figures (relative links `../figures/...`) into the solution file. Code must actually run; include the outputs you got.
+3. **Code tasks.** Write working, commented Python in `code/` (one file per task or problem, e.g. `code/task_2_1_1.py`), run it with `{python}` and save its complete output next to it (`{python} code/task_2_1_1.py > code/task_2_1_1.out 2>&1`), and save plots to `figures/` (PNG). Put the relevant code and the figures (relative links `../figures/...`) into the solution file. Code must actually run; include the outputs you got.
 4. **Inputs.** All required files were collected into `data/` before you started, so normally nothing is missing. Should a task still need something that is not there, never invent results or present fake data as real: write the full code anyway, mark the task `BLOCKED (missing <file>)` and state exactly what must be re-run. The same for packages: if you need one that is not installed, do not work around it with a worse method and do not pip install it; write the code, mark the task `BLOCKED (missing package <name>)`, and list the package at the top of `REPORT.md` under **Missing dependencies** with the install command.
-5. **Self-check.** Re-read every solution against the original statement on the page images. Re-derive or numerically verify each key result. Fix errors.
+5. **Self-check.** Re-read every solution against the original statement on the page images. Re-derive or numerically verify each key result. Fix errors. After the last change, re-run every script so each `code/*.out` matches its code.
 6. **Report.** Write `REPORT.md`: a table with one row per task: id, status (`solved` / `partial` / `blocked`), how it was verified, confidence (high/medium/low), notes. Then a list of open questions for the instructor and every assumption you made.
 
 ## Rules

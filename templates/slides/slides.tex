@@ -7,7 +7,7 @@
 %  - Repeat the frames per concept / problem / task, delete the ones you
 %    do not need, delete the layout comments when a frame is filled.
 %  - Replace every X.Y (problem) and X.Y.Z (task) and every title.
-%  - Keep the stage label (\Refresh, \Given, \Byhand, \Algo, \Impl) as the
+%  - Keep the stage label (\Refresh, \Given, \Byhand, \Algo, \Impl, \Answer) as the
 %    first line of each frame.
 %  - Do not change the preamble or define new colours/macros: the look
 %    lives in exslides.sty and must be identical for every sheet.
@@ -20,17 +20,6 @@
 \date{Solution slides}
 \begin{document}
 \maketitle
-
-\begin{frame}{Roadmap}
-\begin{enumerate}
-\item \textbf{Refresher}: % one line
-\item \textbf{Problem X.Y}: recap; % X.Y.Z short title; ...
-\item \textbf{Takeaways}
-\end{enumerate}
-\bigskip
-Every solution follows the same three steps:\\[3pt]
-\textcolor{hand}{\textbf{by hand}} \;$\to$\; \textcolor{algo}{\textbf{algorithm}} \;$\to$\; \textcolor{impl}{\textbf{implementation}}
-\end{frame}
 
 % ======================================================================
 \section{Refresher: what you should remember}
@@ -106,6 +95,13 @@ Every solution follows the same three steps:\\[3pt]
 \begin{frame}{X.Y.Z -- what the plot shows}
 \Impl
 % \includegraphics[width=\linewidth]{file.png}, then \small one or two sentences
+\end{frame}
+
+% --- task of type "question list": one frame per question instead of the steps
+\begin{frame}{X.Y.Z -- question 1: short title}
+\Answer
+% \textbf{Question 1} (or the sheet's label) the question as on the sheet; \medskip then the answer in one
+% sentence, then the reason / formula / example (at most three sentences)
 \end{frame}
 
 \begin{frame}{Why is the result not the same as in X.Y?}

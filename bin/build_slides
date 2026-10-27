@@ -12,10 +12,15 @@ if grep -nE '<<|X\.Y' slides.tex | grep -v '^[0-9]*:%' | head -5 | grep .; then
   echo "build_slides: unfilled placeholders above"; rc=1
 fi
 for job in slides; do
-  for pass in 1 2; do
+  # rerun only while the pass changed the cross-reference files (page numbers, toc, navigation);
+  # after a small edit one pass is enough, a fresh build needs two
+  aux() { cat build/$job.aux build/$job.nav build/$job.toc build/$job.snm build/$job.out 2>/dev/null | md5sum; }
+  for pass in 1 2 3; do
+    before=$(aux)
     pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build -jobname=$job \
       slides.tex > build/$job.stdout 2>&1
     r=$?
+    [ $r -ne 0 ] || [ "$(aux)" = "$before" ] && break
   done
   if [ $r -ne 0 ] || [ ! -f build/$job.pdf ]; then
     echo "build_slides: $job FAILED:"; grep -A4 '^!' build/$job.log | head -30; rc=1; continue
@@ -25,12 +30,16 @@ for job in slides; do
   grep -E 'Overfull \\(v|h)box \(([2-9][0-9]|[0-9]{3,})' build/$job.log | sort | uniq -c | head -20 \
     | sed 's/^/  layout: /'
   grep -E 'LaTeX Warning: (File|Reference|Citation)' build/$job.log | head -10 | sed 's/^/  warning: /'
-  rm -f build/page-*.png
+  # render all pages in one call, then keep the last page of every frame
+  rm -f build/page-*.png build/all-*.png
+  pdftoppm -r 50 -png $job.pdf build/all
+  pages=$(pdfinfo $job.pdf | awk '/^Pages/{print $2}')
   n=0
   for last in $(grep -o 'framepages {[0-9]*}{[0-9]*}' build/$job.nav | sed 's/.*{//; s/}//'); do
     n=$((n + 1))
-    pdftoppm -r 50 -png -f $last -l $last -singlefile $job.pdf build/page-$(printf %03d $n)
+    mv build/all-$(printf "%0${#pages}d" $last).png build/page-$(printf %03d $n).png
   done
+  rm -f build/all-*.png
   echo "build_slides: $n page images in build/ (one per slide)"
 done
 exit $rc

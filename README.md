@@ -39,7 +39,7 @@ auto_exercises path/to/sheet.pdf
 5. All found files are copied into `data/`. Then a Claude Code agent (`claude -p`, no web access, `prompts/solve.md`) solves everything without asking questions, logging to `agent.log`. It writes:
    - `exercises.md`: a list of every problem and task, with source pages
    - `solutions/problem-X.md`: for each task: idea, step-by-step solution, result, check, pitfalls and takeaways
-   - `code/` and `figures/`: runnable Python and the plots it makes
+   - `code/` and `figures/`: runnable Python, the saved output of each script (`code/*.out`) and the plots it makes
    - `REPORT.md`: status per task (solved/partial/blocked), how it was checked, confidence, and open questions
 6. Exits with code 0 only if the agent finished and wrote `REPORT.md`.
 
@@ -54,11 +54,12 @@ A fresh agent turns the solutions into slides by filling in one template deck:
 
 - `templates/slides/exslides.sty`: the look, i.e. the preamble of the hand-made reference deck
   `reference/poml-ex-02/slides` (Metropolis theme, colour-coded stage labels `\Refresh`, `\Given`, `\Byhand`,
-  `\Algo`, `\Impl`). Change the design only here.
+  `\Algo`, `\Impl`, `\Answer`). Change the design only here.
 - `templates/slides/pattern.md`: the presentation pattern, the ONE place that defines which slides exist, in
-  which order, and what each says, line by line (deck: title, roadmap, refresher, problems, takeaways; per problem
+  which order, and what each says, line by line (deck: title, refresher, problems, takeaways; per problem
   a recap (given, overview of the tasks); per task, in the sheet's order, its background, what is asked, then
-  by hand -> algorithm -> implementation). It is pasted into the slide agent's prompt as is.
+  its solution by task type: computation = by hand -> algorithm -> implementation (default),
+  question list = question, short answer, next question, ...). It is pasted into the slide agent's prompt as is.
   To change how tasks are presented, edit only this file.
 - `templates/slides/slides.tex`: an empty deck in that style with one frame per kind of slide, showing only its layout.
 - `prompts/slides.md`: rules for the slide agent (one thought per slide, words for every step, numbers must
