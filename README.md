@@ -60,7 +60,7 @@ A fresh agent turns the solutions into slides by filling in one template deck:
   real data) -> algorithm -> implementation (code + figure, result and checks, plot), comparison, takeaways.
   Each frame has its title and stage label; comments inside say what goes there.
 - `prompts/slides.md`: rules for the slide agent (one thought per slide, words for every step, numbers must
-  match the solutions, doubts go to `NOTES.md`, never invent plots).
+  match the solutions, images from the sheet on the recap slides, doubts go to `NOTES.md`, never invent plots).
 - `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting); fails on LaTeX errors or leftover placeholders (`X.Y`, `<<...>>`).
 
 Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `NOTES.md` (for the instructor).
