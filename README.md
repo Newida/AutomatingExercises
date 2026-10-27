@@ -43,7 +43,7 @@ auto_exercises path/to/sheet.pdf
    - `REPORT.md`: status per task (solved/partial/blocked), how it was checked, confidence, and open questions
 6. Exits with code 0 only if the agent finished and wrote `REPORT.md`.
 
-Options: `--model`, `--data DIR` (repeatable), `--force` (start over), `--dry-run` (prepare the folder and print the prompt without starting an agent).
+Options: `--model`, `--effort LEVEL` (low, medium, high, xhigh, max; applies to every agent run), `--data DIR` (repeatable), `--force` (start over), `--dry-run` (prepare the folder and print the prompt without starting an agent).
 
 Setup: the script is `bin/auto_exercises`, symlinked into `~/.local/bin`. All agents use one Python environment, `.venv/` (Python 3.12; numpy, scipy, sympy, pandas, matplotlib, seaborn, scikit-learn, jax, torch, torchvision, CPU only; `csv` is built in). It is defined in `env/requirements.txt` and built by `bin/setup_env`. Agents never install packages: the input check complains about missing ones before solving, and a solver that still finds one missing marks the task `BLOCKED (missing package ...)` and lists it under **Missing dependencies** in `REPORT.md`. To add a package: append it to `env/requirements.txt` and run `bin/setup_env`.
 

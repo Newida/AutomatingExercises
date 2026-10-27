@@ -70,26 +70,39 @@ def show(event, t0):
               + (f", ~${cost:.2f} API-equivalent" if cost else "") + ")", flush=True)
 
 
-def run_claude(out, prompt, model, logname="agent.log"):
+def run_claude(out, prompt, model, effort, logname="agent.log"):
+    """Run one agent; on failure stop at once and print the agent's own error message."""
     cmd = ["claude", "-p", prompt, "--output-format", "stream-json", "--verbose",
            "--permission-mode", "bypassPermissions",
            "--disallowedTools", "WebFetch", "WebSearch"]
     if model:
         cmd += ["--model", model]
+    if effort:
+        cmd += ["--effort", effort]
     t0 = time.time()
+    errors, failed = [], False  # non-JSON output (CLI errors, warnings) and error results
     with open(out / logname, "w") as log:
         p = subprocess.Popen(cmd, cwd=out, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         try:
             for line in p.stdout:
                 log.write(line); log.flush()
                 try:
-                    show(json.loads(line), t0)
+                    event = json.loads(line)
                 except json.JSONDecodeError:
                     print(short(line), flush=True)
-            return p.wait()
+                    if line.strip():
+                        errors.append(line.strip())
+                    continue
+                show(event, t0)
+                if event.get("type") == "result" and event.get("is_error"):
+                    failed = True
+                    errors += [str(e) for e in event.get("errors") or []] or [str(event.get("result") or event.get("subtype"))]
+            rc = p.wait()
         except KeyboardInterrupt:
             p.terminate(); p.wait()
             stop(f"interrupted; partial results in {out}", 130)
+    if rc or failed:
+        stop(f"agent failed (exit code {rc}); see {out / logname}\n" + "\n".join(errors[-10:]))
 
 
 def installed_packages():
@@ -108,16 +121,16 @@ def find_file(name, dirs):
     return None
 
 
-def check_inputs(out, pdf, data_dirs, model):
+def check_inputs(out, pdf, data_dirs, model, effort):
     """Ask an agent what the sheet needs, then check it is all there. Stops (exit 2) with a list if not."""
     req_file = out / "source" / "requirements.json"
     if not req_file.exists():
         print("auto_exercises: checking what the sheet needs (data files, packages) ...")
         prompt = (CHECK_PROMPT.read_text().replace("{python}", str(VENV_PY))
                   .replace("{packages}", ", ".join(installed_packages())))
-        rc = run_claude(out, prompt, model, "check.log")
-        if rc or not req_file.exists():
-            stop(f"input check failed (rc={rc}); see {out / 'check.log'}")
+        run_claude(out, prompt, model, effort, "check.log")
+        if not req_file.exists():
+            stop(f"input check failed (no requirements.json); see {out / 'check.log'}")
     try:
         req = json.loads(req_file.read_text())
         files, pkgs = req.get("files", []), req.get("packages", [])
@@ -162,7 +175,7 @@ def check_inputs(out, pdf, data_dirs, model):
     sys.exit(2)
 
 
-def make_slides(out, model):
+def make_slides(out, model, effort):
     """Copy the slide template into out/slides, let an agent fill it, then build and check the PDFs."""
     sl = out / "slides"
     if sl.exists():
@@ -173,9 +186,7 @@ def make_slides(out, model):
     prompt = SLIDES_PROMPT.read_text().replace("{build}", str(BUILD))
     (out / "source" / "slides_prompt.md").write_text(prompt)
     print("auto_exercises: making slides from the solutions (log in slides.log) ...")
-    rc = run_claude(out, prompt, model, "slides.log")
-    if rc:
-        stop(f"slide agent exited with code {rc}; see {out / 'slides.log'}")
+    run_claude(out, prompt, model, effort, "slides.log")
     b = subprocess.run([str(BUILD), str(sl)], capture_output=True, text=True)
     print(b.stdout, end="")
     if b.returncode:
@@ -191,6 +202,8 @@ def main():
                     "solutions/, code/, figures/, REPORT.md and slides/ (slides.pdf, handout.pdf).")
     ap.add_argument("pdf", help="path to the exercise sheet PDF")
     ap.add_argument("--model", help="Claude model (default: Claude Code's default)")
+    ap.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"],
+                    help="reasoning effort for every agent run (default: Claude Code's setting)")
     ap.add_argument("--force", action="store_true", help="replace an existing solution directory")
     ap.add_argument("--data", action="append", default=[], metavar="DIR",
                     help="extra folder to search for data files the sheet needs (repeatable)")
@@ -218,7 +231,7 @@ def main():
     if a.slides_only:
         if not (out / "REPORT.md").exists():
             stop(f"{out} is not solved yet (no REPORT.md); run without --slides-only first")
-        make_slides(out, a.model)
+        make_slides(out, a.model, a.effort)
         return
     n = prepare(pdf, out, a.force)
     prompt = PROMPT.read_text().replace("{python}", str(VENV_PY))
@@ -230,16 +243,14 @@ def main():
     if a.dry_run:
         print(prompt)
         return
-    check_inputs(out, pdf, [Path(d).expanduser().resolve() for d in a.data], a.model)
+    check_inputs(out, pdf, [Path(d).expanduser().resolve() for d in a.data], a.model, a.effort)
     print("auto_exercises: solving; no human in the loop from here on.")
     print("auto_exercises: starting agent (Ctrl-C to abort; full log in agent.log)")
-    rc = run_claude(out, prompt, a.model)
-    if rc:
-        stop(f"agent exited with code {rc}; see {out / 'agent.log'}")
+    run_claude(out, prompt, a.model, a.effort)
     if not (out / "REPORT.md").exists():
         stop(f"agent finished without REPORT.md; see {out / 'agent.log'}")
     print(f"auto_exercises: solved. Report: {out / 'REPORT.md'}")
-    make_slides(out, a.model)
+    make_slides(out, a.model, a.effort)
     print(f"\nauto_exercises: done. Everything in {out}")
 
 
