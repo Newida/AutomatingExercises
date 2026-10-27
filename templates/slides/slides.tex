@@ -1,9 +1,11 @@
 % ======================================================================
 %  Solution slides TEMPLATE: an empty deck in the shared style.
 %  Copied to slides/slides.tex; fill it in.
-%  - Every frame below is a PATTERN: repeat it per concept / problem /
-%    task, delete the ones you do not need.  The comments in each frame
-%    say what goes there; delete them when the frame is filled.
+%  - WHICH slides come in WHICH order and WHAT they say is defined in
+%    pattern.md (given to you in the prompt).  This file only shows HOW
+%    each kind of slide is laid out: one frame per kind.
+%  - Repeat the frames per concept / problem / task, delete the ones you
+%    do not need, delete the layout comments when a frame is filled.
 %  - Replace every X.Y (problem) and X.Y.Z (task) and every title.
 %  - Keep the stage label (\Refresh, \Given, \Byhand, \Algo, \Impl) as the
 %    first line of each frame.
@@ -19,11 +21,10 @@
 \begin{document}
 \maketitle
 
-% ---------- PATTERN: roadmap (once) ----------
 \begin{frame}{Roadmap}
 \begin{enumerate}
-\item \textbf{Refresher}: % the background the sheet assumes, in one line
-\item \textbf{Problem X.Y}: recap; % X.Y.Z short title; X.Y.Z short title; ...
+\item \textbf{Refresher}: % one line
+\item \textbf{Problem X.Y}: recap; % X.Y.Z short title; ...
 \item \textbf{Takeaways}
 \end{enumerate}
 \bigskip
@@ -32,93 +33,90 @@ Every solution follows the same three steps:\\[3pt]
 \end{frame}
 
 % ======================================================================
-% ---------- PATTERN: refresher (optional; one concept per slide) ----------
 \section{Refresher: what you should remember}
 
 \begin{frame}{Refresher: concept}
 \Refresh
-% setting in one sentence; then a numbered list: definition with formula,
-% key properties, what it means in words, a common misunderstanding.
-% A figure may sit centred above a display formula.
+% one sentence, then \begin{enumerate} with display formulas \[...\];
+% a figure may sit centred above a display formula
 \end{frame}
 
 % ======================================================================
-% ---------- PATTERN: problem recap (per problem) ----------
 \section{Problem X.Y: recap of the task}
 
 \begin{frame}{Given}
 \Given
-% itemize: the data (file, what one row means), the model/formulas from the
-% sheet with their equation numbers, results/functions from earlier tasks.
-% If the sheet shows an image here, it goes on this slide (cut from the sheet):
-% \begin{columns}[T] \column{.42\textwidth} list
+% \begin{itemize} ... \end{itemize}
+% with an image from the sheet: \begin{columns}[T] \column{.42\textwidth} list
 % \column{.56\textwidth} \includegraphics[width=\linewidth]{sheet_pP_NAME.png}
 % {\footnotesize sheet, p.~P} \end{columns}
 \end{frame}
 
-\begin{frame}{Problem to solve}\small
+\begin{frame}{Overview: the tasks}\small
 \Given
-% \begin{description}[Task X.Y.Z] \item[Task X.Y.Z] faithful restatement
-% of each task in the sheet's notation \end{description}
-% If a task statement shows an image, add it in two columns as on "Given".
+% \begin{description}[Task X.Y.Z] \item[Task X.Y.Z] short title: a few words \end{description}
 \end{frame}
 
 % ======================================================================
-% ---------- PATTERN: task (per task: by hand -> algorithm -> implementation) ----------
 \section{Task X.Y.Z: short task title}
+
+\begin{frame}{Background: question it answers}
+\Given
+% \begin{itemize} short steps \end{itemize}, display formulas \[ ... \quad(5) \]
+% with the sheet's equation numbers; last item: \item[$\Rightarrow$] what it means;
+% with an image: two columns as on "Given"
+\end{frame}
+
+\begin{frame}{X.Y.Z -- what is asked}\small
+\Given
+% the task restated; display formulas with equation numbers; then \medskip
+% and the sheet's warning or expectation; with an image: two columns as on "Given"
+\end{frame}
 
 \begin{frame}{X.Y.Z -- by hand on a toy example}\small
 \Byhand
-% a tiny version of the problem (display it), numbered steps with the
-% actual numbers, then \alert{Why ...?} for the subtle point it reveals
+% the toy data as a display formula, \begin{enumerate} of steps,
+% then \medskip and \alert{Why ...?}
 \end{frame}
 
 \begin{frame}{X.Y.Z -- by hand: the real data}
 \Byhand
-% the same steps on the real data: a centred booktabs table of the key
-% numbers, then "Sanity checks: ..." in one or two sentences.
-% For a math task: the derivation in numbered steps, one formula each.
+% \begin{center}\begin{tabular}{lr}\toprule ... \bottomrule\end{tabular}\end{center}
+% then \medskip and "Sanity checks: ..."
 \end{frame}
 
 \begin{frame}{X.Y.Z -- algorithm}
 \Algo
-% the method as numbered steps in words (input ... output),
-% then \alert{Pitfall:} the typical mistake
+% \begin{enumerate} of steps, then \medskip and \alert{Pitfall:}
 \end{frame}
 
 \begin{frame}[fragile]{X.Y.Z -- implementation}
 \Impl
-% the essential 10-25 lines in \begin{lstlisting} ... \end{lstlisting}.
-% With a figure: \begin{columns}[T] \column{.55\textwidth} code
+% \begin{lstlisting} ... \end{lstlisting} (frame must be [fragile]);
+% with a figure: \begin{columns}[T] \column{.55\textwidth} code
 % \column{.43\textwidth} \includegraphics[width=\linewidth]{file.png}
-% \small itemize of what non-obvious lines do \end{columns}
+% \small \begin{itemize} notes \end{itemize} \end{columns}
 \end{frame}
 
 \begin{frame}{X.Y.Z -- result and checks}
 \Impl
-% \[\boxed{\text{final answer}}\], then \textbf{Checks} and an itemize of
-% independent checks (second method, other starts, hand values, sanity checks)
+% \[\boxed{...}\], then \textbf{Checks} and \begin{itemize}
 \end{frame}
 
 \begin{frame}{X.Y.Z -- what the plot shows}
 \Impl
-% \includegraphics[width=\linewidth]{file.png} full width,
-% then \small one or two sentences on what to look at
+% \includegraphics[width=\linewidth]{file.png}, then \small one or two sentences
 \end{frame}
-% ---------- end PATTERN task ----------
 
-% ---------- PATTERN: comparison (optional, no stage label) ----------
 \begin{frame}{Why is the result not the same as in X.Y?}
-% centred booktabs table: rows = aspects (objective, what counts once,
-% result values), columns = the methods; then a one-sentence conclusion
+% no stage label; \begin{center} booktabs table \end{center}, then one sentence
 \end{frame}
 
 % ======================================================================
-% ---------- PATTERN: takeaways (once, at the end) ----------
 \section{Takeaways}
 
 \begin{frame}{Takeaways}\small
-% itemize: one line per lesson of the sheet
+% \begin{itemize} one line per lesson
 \end{frame}
 
 \end{document}

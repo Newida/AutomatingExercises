@@ -55,12 +55,14 @@ A fresh agent turns the solutions into slides by filling in one template deck:
 - `templates/slides/exslides.sty`: the look, i.e. the preamble of the hand-made reference deck
   `reference/poml-ex-02/slides` (Metropolis theme, colour-coded stage labels `\Refresh`, `\Given`, `\Byhand`,
   `\Algo`, `\Impl`). Change the design only here.
-- `templates/slides/slides.tex`: an empty deck in that style, one frame per slide type of the reference deck:
-  title, roadmap, refresher, per problem a recap (given, problem to solve), per task by hand (toy example,
-  real data) -> algorithm -> implementation (code + figure, result and checks, plot), comparison, takeaways.
-  Each frame has its title and stage label; comments inside say what goes there.
+- `templates/slides/pattern.md`: the presentation pattern, the ONE place that defines which slides exist, in
+  which order, and what each says, line by line (deck: title, roadmap, refresher, problems, takeaways; per problem
+  a recap (given, overview of the tasks); per task, in the sheet's order, its background, what is asked, then
+  by hand -> algorithm -> implementation). It is pasted into the slide agent's prompt as is.
+  To change how tasks are presented, edit only this file.
+- `templates/slides/slides.tex`: an empty deck in that style with one frame per kind of slide, showing only its layout.
 - `prompts/slides.md`: rules for the slide agent (one thought per slide, words for every step, numbers must
-  match the solutions, images from the sheet on the recap slides, doubts go to `NOTES.md`, never invent plots).
+  match the solutions, images from the sheet where the sheet shows them, doubts go to `NOTES.md`, never invent plots).
 - `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting); fails on LaTeX errors or leftover placeholders (`X.Y`, `<<...>>`).
 
 Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `NOTES.md` (for the instructor).

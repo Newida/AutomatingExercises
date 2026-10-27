@@ -183,7 +183,8 @@ def make_slides(out, model, effort):
     sl.mkdir()
     for f in ("slides.tex", "exslides.sty"):
         shutil.copy2(TEMPLATE / f, sl / f)
-    prompt = SLIDES_PROMPT.read_text().replace("{build}", str(BUILD))
+    prompt = (SLIDES_PROMPT.read_text().replace("{build}", str(BUILD))
+              .replace("{pattern}", (TEMPLATE / "pattern.md").read_text()))
     (out / "source" / "slides_prompt.md").write_text(prompt)
     print("auto_exercises: making slides from the solutions (log in slides.log) ...")
     run_claude(out, prompt, model, effort, "slides.log")
