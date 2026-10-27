@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # build_slides DIR: compile DIR/slides.tex into slides.pdf (with \pause steps, for presenting).
 # Prints errors and layout warnings, and renders build/page-NNN.png: one image per slide (its last reveal step).
-# Exit 0 only if the PDF was built, no LaTeX errors and no <<placeholders>> remain.
+# Exit 0 only if the PDF was built, no LaTeX errors and no placeholders (<<...>>, X.Y) remain.
 set -u
 dir=${1:?usage: build_slides DIR}
 cd "$dir" || exit 1
 [ -f slides.tex ] || { echo "build_slides: no slides.tex in $dir"; exit 1; }
 mkdir -p build
 rc=0
-if grep -n '<<' slides.tex | grep -v '^[0-9]*:%' | head -5 | grep .; then
-  echo "build_slides: unfilled <<placeholders>> above"; rc=1
+if grep -nE '<<|X\.Y' slides.tex | grep -v '^[0-9]*:%' | head -5 | grep .; then
+  echo "build_slides: unfilled placeholders above"; rc=1
 fi
 for job in slides; do
   for pass in 1 2; do

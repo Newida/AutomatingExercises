@@ -50,15 +50,18 @@ Setup: the script is `bin/auto_exercises`, symlinked into `~/.local/bin`. All ag
 
 ### Phase 3: slides
 
-A fresh agent turns the solutions into slides using the shared template:
+A fresh agent turns the solutions into slides by filling in one template deck:
 
-- `templates/slides/exslides.sty`: the look (colours, boxes, footer). Change the design only here.
-- `templates/slides/slides.tex`: the skeleton with patterns: title, overview, per problem a divider, per task
-  (1) what is asked, (2) idea, (3) solution steps with `\pause`, (4) code, (5) figure, (6) result + check,
-  (7) pitfalls & takeaway; summary table at the end.
+- `templates/slides/exslides.sty`: the look, i.e. the preamble of the hand-made reference deck
+  `reference/poml-ex-02/slides` (Metropolis theme, colour-coded stage labels `\Refresh`, `\Given`, `\Byhand`,
+  `\Algo`, `\Impl`). Change the design only here.
+- `templates/slides/slides.tex`: an empty deck in that style, one frame per slide type of the reference deck:
+  title, roadmap, refresher, per problem a recap (given, problem to solve), per task by hand (toy example,
+  real data) -> algorithm -> implementation (code + figure, result and checks, plot), comparison, takeaways.
+  Each frame has its title and stage label; comments inside say what goes there.
 - `prompts/slides.md`: rules for the slide agent (one thought per slide, words for every step, numbers must
   match the solutions, doubts go to `NOTES.md`, never invent plots).
-- `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting); fails on LaTeX errors or leftover `<<placeholders>>`.
+- `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting); fails on LaTeX errors or leftover placeholders (`X.Y`, `<<...>>`).
 
 Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `NOTES.md` (for the instructor).
 Remake only the slides of an already solved sheet: `auto_exercises sheet.pdf --slides-only`.

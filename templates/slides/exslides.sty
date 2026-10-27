@@ -1,115 +1,27 @@
-% exslides.sty -- shared look for all exercise solution slides.
-% Change the design HERE, never in a generated slides.tex.
+% exslides.sty -- shared look for all exercise solution slides: the preamble of the
+% hand-made reference deck reference/poml-ex-02/slides. Change the design HERE only.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{exslides}[2026/10/26 exercise solution slides]
+\ProvidesPackage{exslides}[2026/10/27 exercise solution slides]
 
-\RequirePackage[T1]{fontenc}
 \RequirePackage{lmodern}
-\RequirePackage{amsmath,amssymb,mathtools,bm}
-\RequirePackage{graphicx}
+\usetheme[progressbar=frametitle,numbering=fraction]{metropolis}
+\RequirePackage{amsmath,amssymb,bm}
+\RequirePackage{listings,xcolor}
 \RequirePackage{booktabs}
-\RequirePackage{listings}
-\RequirePackage[most]{tcolorbox}
-\graphicspath{{../figures/}{figures/}}
+\graphicspath{{figures/}{../figures/}}
 
-% ---------- colours ----------
-\definecolor{exmain}{HTML}{1F4E79}
-\definecolor{exidea}{HTML}{6B4C9A}
-\definecolor{exresult}{HTML}{2E7D32}
-\definecolor{excheck}{HTML}{00796B}
-\definecolor{exwarn}{HTML}{C65D00}
-\definecolor{exgray}{HTML}{5F6B73}
-\definecolor{excode}{HTML}{F5F7FA}
-
-% ---------- beamer look ----------
-\usetheme{default}
-\setbeamertemplate{navigation symbols}{}
-\setbeamercolor{structure}{fg=exmain}
-\setbeamercolor{frametitle}{fg=exmain}
-\setbeamerfont{frametitle}{series=\bfseries,size=\large}
-\setbeamertemplate{itemize items}[circle]
-\setbeamercovered{transparent=15}
-
-% running info shown in the footer
-\newcommand\ex@course{}\newcommand\ex@sheet{}
-\newcommand\ex@where{}
-\newcommand\course[1]{\renewcommand\ex@course{#1}}
-\newcommand\sheet[1]{\renewcommand\ex@sheet{#1}}
-\setbeamertemplate{footline}{%
-  \leavevmode\hbox to\paperwidth{\hskip1em
-    \color{exgray}\tiny\ex@course\ifx\ex@sheet\@empty\else\ --\ \ex@sheet\fi
-    \hfill\ex@where\hfill\insertframenumber/\inserttotalframenumber\hskip1em}\vskip4pt}
-
-% ---------- title + structure ----------
-% \makeexercisetitle  (uses \title, \subtitle, \course, \sheet, \date)
-\newcommand\makeexercisetitle{%
-  \begin{frame}[plain]
-    \vfill
-    {\color{exgray}\small\ex@course\par}\medskip
-    {\color{exmain}\Large\bfseries\ex@sheet\par}\smallskip
-    {\color{exmain}\huge\bfseries\inserttitle\par}
-    \ifx\insertsubtitle\@empty\else\medskip{\large\insertsubtitle\par}\fi
-    \vfill
-    {\color{exgray}\small Solution slides\ifx\insertdate\@empty\else\ \textperiodcentered\ \insertdate\fi\par}
-  \end{frame}}
-
-% \exproblem{2.2}{Fitting a Weibull to a histogram}{one sentence: what this problem is about}
-% Starts a new problem: section + divider slide.
-\newcommand\exproblem[3]{%
-  \section{Problem #1: #2}%
-  \renewcommand\ex@where{Problem #1}%
-  \begin{frame}[plain]
-    \vfill
-    {\color{exgray}\large Problem #1\par}\smallskip
-    {\color{exmain}\LARGE\bfseries #2\par}\bigskip
-    \begin{minipage}{0.8\textwidth}\large #3\end{minipage}
-    \vfill
-  \end{frame}}
-
-% \extask{2.2.1}{Newton's method}  -- sets the footer; put it before the task's first frame
-\newcommand\extask[2]{\renewcommand\ex@where{Task #1: #2}\subsection{Task #1: #2}}
-
-% \exstep{1}{Write the histogram as a weighted sample}  -- labelled solution step
-\newcommand\exstep[2]{{\color{exmain}\bfseries Step #1.}\ #2\par\smallskip}
-
-% \sheetref{p.~7, eq.~(9)}  -- where in the sheet something comes from
-\newcommand\sheetref[1]{{\color{exgray}\footnotesize[sheet #1]}}
-
-% ---------- boxes ----------
-\tcbset{exbase/.style={enhanced,boxrule=0pt,arc=2pt,left=6pt,right=6pt,top=3pt,bottom=3pt,
-  fonttitle=\bfseries\small,coltitle=white,before skip=4pt,after skip=4pt}}
-\newtcolorbox{taskbox}[1][Task]{exbase,colback=exmain!6,colframe=exmain,title={#1}}
-\newtcolorbox{ideabox}[1][Idea]{exbase,colback=exidea!7,colframe=exidea,title={#1}}
-\newtcolorbox{resultbox}[1][Result]{exbase,colback=exresult!8,colframe=exresult,title={#1}}
-\newtcolorbox{checkbox}[1][Check]{exbase,colback=excheck!7,colframe=excheck,title={#1}}
-\newtcolorbox{pitfallbox}[1][Pitfall]{exbase,colback=exwarn!8,colframe=exwarn,title={#1}}
-\newtcolorbox{takeawaybox}[1][Takeaway]{exbase,colback=exmain!4,colframe=exmain!70,title={#1}}
-% \keyeq{...}: highlighted display equation (the one formula to remember)
-\newcommand\keyeq[1]{\begin{tcolorbox}[enhanced,colback=exmain!5,colframe=exmain!40,boxrule=0.4pt,
-  arc=2pt,top=0pt,bottom=0pt,before skip=4pt,after skip=4pt]\vspace{-2pt}\[#1\]\end{tcolorbox}}
-
-% ---------- figures ----------
-% \exfigure[height]{file.png}{caption} -- draws a placeholder if the file is missing
-\newcommand\exfigure[3][0.7\textheight]{%
-  \begin{center}
-  \IfFileExists{#2}{\includegraphics[height=#1,width=\textwidth,keepaspectratio]{#2}}%
-   {\IfFileExists{../figures/#2}{\includegraphics[height=#1,width=\textwidth,keepaspectratio]{../figures/#2}}%
-    {\fbox{\parbox[c][#1][c]{0.6\textwidth}{\centering\color{exwarn}missing figure: \texttt{\detokenize{#2}}}}}}%
-  \par\smallskip{\footnotesize\color{exgray}#3\par}
-  \end{center}}
-
-% ---------- code ----------
-\lstdefinestyle{expython}{language=Python,basicstyle=\ttfamily\scriptsize,
-  keywordstyle=\color{exmain}\bfseries,commentstyle=\color{exgray}\itshape,
-  stringstyle=\color{exresult},backgroundcolor=\color{excode},frame=none,
-  showstringspaces=false,columns=fullflexible,keepspaces=true,
-  breaklines=true,xleftmargin=4pt,aboveskip=4pt,belowskip=4pt,
-  literate={-}{-}1}
-\lstset{style=expython}
-% frames containing code must be [fragile]:
-%   \begin{frame}[fragile]{...}\begin{lstlisting} ... \end{lstlisting}\end{frame}
-% or include from the code folder (no fragile needed):
-%   \excode[firstline=10,lastline=25]{problem_2_2.py}
-\newcommand\excode[2][]{\lstinputlisting[#1]{../code/#2}}
+\definecolor{given}{HTML}{1F6FB2}
+\definecolor{hand}{HTML}{2E7D32}
+\definecolor{algo}{HTML}{B26A00}
+\definecolor{impl}{HTML}{6A1B9A}
+\lstset{language=Python,basicstyle=\ttfamily\footnotesize,keywordstyle=\color{impl}\bfseries,
+  commentstyle=\color{gray},showstringspaces=false,columns=fullflexible,keepspaces=true}
+% stage labels: every solution slide says which stage it is
+\newcommand{\stage}[2]{{\color{#1}\bfseries\small\textsc{#2}}\par\smallskip}
+\newcommand{\Byhand}{\stage{hand}{Step 1 -- by hand}}
+\newcommand{\Algo}{\stage{algo}{Step 2 -- algorithm}}
+\newcommand{\Impl}{\stage{impl}{Step 3 -- implementation}}
+\newcommand{\Given}{\stage{given}{Recap}}
+\newcommand{\Refresh}{\stage{given}{Refresher}}
 
 \endinput
