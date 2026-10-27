@@ -58,10 +58,9 @@ A fresh agent turns the solutions into slides using the shared template:
   (7) pitfalls & takeaway; summary table at the end.
 - `prompts/slides.md`: rules for the slide agent (one thought per slide, words for every step, numbers must
   match the solutions, doubts go to `NOTES.md`, never invent plots).
-- `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting) and `handout.pdf`
-  (one page per slide, for students); fails on LaTeX errors or leftover `<<placeholders>>`.
+- `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting); fails on LaTeX errors or leftover `<<placeholders>>`.
 
-Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `handout.pdf`, `NOTES.md` (for the instructor).
+Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `NOTES.md` (for the instructor).
 Remake only the slides of an already solved sheet: `auto_exercises sheet.pdf --slides-only`.
 
 Not built yet: independent checking of the solutions.

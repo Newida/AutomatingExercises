@@ -176,7 +176,7 @@ def check_inputs(out, pdf, data_dirs, model, effort):
 
 
 def make_slides(out, model, effort):
-    """Copy the slide template into out/slides, let an agent fill it, then build and check the PDFs."""
+    """Copy the slide template into out/slides, let an agent fill it, then build and check the PDF."""
     sl = out / "slides"
     if sl.exists():
         shutil.rmtree(sl)
@@ -191,7 +191,7 @@ def make_slides(out, model, effort):
     print(b.stdout, end="")
     if b.returncode:
         stop(f"slides do not build cleanly; see {sl / 'build'}")
-    print(f"auto_exercises: slides: {sl / 'slides.pdf'}\n  handout: {sl / 'handout.pdf'}\n  notes: {sl / 'NOTES.md'}")
+    print(f"auto_exercises: slides: {sl / 'slides.pdf'}\n  notes: {sl / 'NOTES.md'}")
 
 
 def main():
@@ -199,7 +199,7 @@ def main():
         prog="auto_exercises",
         description="Solve every exercise on a sheet with an AI agent. "
                     "Creates <sheet>_solutions/ next to the PDF with exercises.md, "
-                    "solutions/, code/, figures/, REPORT.md and slides/ (slides.pdf, handout.pdf).")
+                    "solutions/, code/, figures/, REPORT.md and slides/ (slides.pdf).")
     ap.add_argument("pdf", help="path to the exercise sheet PDF")
     ap.add_argument("--model", help="Claude model (default: Claude Code's default)")
     ap.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"],

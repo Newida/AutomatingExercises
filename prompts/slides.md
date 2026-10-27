@@ -10,14 +10,14 @@ You work inside the solution directory (your current working directory). Write o
 - `code/`, `figures/`: the code and plots the solutions refer to.
 - `source/sheet.pdf`, `source/pages/page-*.png`: the original sheet, for notation and page references.
 - `slides/slides.tex`: the TEMPLATE, already copied here. `slides/exslides.sty`: the shared style. Never edit `exslides.sty`.
-- Build command: `{build} slides` (compiles `slides/slides.pdf` for presenting and `slides/handout.pdf` for students, and prints errors and layout warnings).
+- Build command: `{build} slides` (compiles `slides/slides.pdf` and prints errors and layout warnings).
 
 ## Steps
 
 1. Read `slides/slides.tex` and `slides/exslides.sty` to learn the patterns and macros. Read `exercises.md`, `REPORT.md` and all solution files.
 2. Fill in `slides/slides.tex`: keep the preamble, fill the title data, then for every problem in sheet order use the problem PATTERN, and for every task the task PATTERN. Remove all pattern comments and unused patterns. No `<<...>>` may remain.
 3. Run `{build} slides`. Fix every error.
-4. Look at the result: `pdftoppm -r 50 -png slides/handout.pdf slides/build/page` and Read the page images. Fix anything that overflows the slide, is cut off, too small, cramped or empty. Repeat steps 3-4 until it is clean.
+4. Look at the result: Read the page images `slides/build/page-*.png` that the build made (one per slide, with every reveal step shown). Fix anything that overflows the slide, is cut off, too small, cramped or empty. Repeat steps 3-4 until it is clean.
 5. Write `slides/NOTES.md` for the instructor: which tasks have medium/low confidence or are blocked, open questions from `REPORT.md`, anything you simplified or left out, and the slide number for each task.
 
 ## Rules for every slide
