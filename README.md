@@ -1,82 +1,171 @@
 # automatingExercises
 
-## Goal
+Turn an exercise sheet (PDF) into solution slides with one command.
 
-Build a fully automated system that creates exercise solution slides: slides I can present in the exercise class and that students can follow and understand on their own.
+```bash
+auto_exercises sheet03.pdf
+```
 
-## Approach
+Claude Code agents read the sheet, solve every task (with runnable Python code and plots) and then make a
+Beamer slide deck that you can present in the exercise class and that students can follow on their own.
+There is no human in the loop once the inputs are complete.
 
-We follow Tim Dettmers' guide on working with agents:
+The approach follows Tim Dettmers' guide on working with agents:
 https://timdettmers.com/2026/01/13/use-agents-or-be-left-behind/
+
+## Setup
+
+Linux (or macOS) with:
+
+| Needed | For | Install (Debian/Ubuntu) |
+|---|---|---|
+| [Claude Code](https://claude.com/claude-code) CLI `claude`, logged in | the agents | `npm install -g @anthropic-ai/claude-code`, then run `claude` once to log in |
+| Python 3.12 | the solver environment | `uv python install 3.12` (or your system's `python3.12`) |
+| poppler (`pdftotext`, `pdftoppm`, `pdfinfo`) | reading the sheet, page images | `sudo apt install poppler-utils` |
+| `pdflatex` with beamer, the metropolis theme, lmodern, listings, booktabs | building the slides | `sudo apt install texlive-latex-extra texlive-fonts-recommended lmodern` |
+
+Then:
+
+```bash
+git clone <this repo> automatingExercises
+cd automatingExercises
+bin/setup_env                      # builds .venv/ from env/requirements.txt (a few GB: torch, jax)
+ln -s "$PWD/bin/auto_exercises" ~/.local/bin/auto_exercises   # optional: call it from anywhere
+```
+
+`bin/setup_env` uses `python3.12` from your PATH; to use another interpreter, run `PYTHON=/path/to/python3.12 bin/setup_env`.
 
 ## Usage
 
-The whole pipeline is started with one command, with the path to the exercise PDF as its only required argument:
-
 ```bash
-auto_exercises path/to/sheet.pdf
+auto_exercises path/to/sheet.pdf                      # full run: check inputs, solve, make slides
+auto_exercises sheet.pdf --data ~/datasets            # extra folder to look for data files (repeatable)
+auto_exercises sheet.pdf --slides-only                # only remake the slides of an already solved sheet
+auto_exercises sheet.pdf --model sonnet --effort low  # cheaper / faster agents
+auto_exercises --help
 ```
 
-- `auto_exercises` is a single command-line script; it runs every stage (read the PDF, solve, check, make slides) without further interaction.
-- The PDF path is a positional argument, so no flag is needed (`auto_exercises sheet03.pdf`).
-- Output goes to a new folder next to the PDF, named after it (e.g. `sheet03_solutions/`), containing the slides as PDF plus their editable LaTeX source.
-- On success the script prints where the slides are; if it stops (see "When the pipeline stops"), it prints the reason and exits with a non-zero code.
-- `auto_exercises --help` explains the usage.
+| Option | Meaning |
+|---|---|
+| `--model MODEL` | Claude model for every agent (default: Claude Code's default) |
+| `--effort LEVEL` | `low`, `medium`, `high`, `xhigh`, `max`: reasoning effort for every agent. If the model does not support it, the run stops at once with the agent's error |
+| `--data DIR` | extra folder to search for data files the sheet needs (repeatable) |
+| `--slides-only` | keep the solutions, only redo the slides (use this after changing the slide templates) |
+| `--force` | delete an existing `<sheet>_solutions/` folder and start over |
+| `--dry-run` | prepare the folder and print the solver prompt, without starting an agent |
 
-## Current state (solve, then slides)
+The input is one PDF with the whole exercise sheet. Nothing else is needed: no solutions, no lecture notes.
+Data files the sheet refers to (CSV files, provided code) are looked for next to the PDF, in `<sheet>_data/` and in every `--data DIR`.
 
-`auto_exercises sheet.pdf` runs in two phases.
+### What happens
 
-**Phase 1: check inputs. It complains until it has everything.**
+1. **Check inputs.** An agent reads the sheet and lists every data file and Python package it needs
+   (`source/requirements.json`). If something is missing, the script stops with exit code 2 and says what is
+   missing, which tasks need it and how to fix it. Add the files and rerun the same command; the check is not repeated.
+2. **Solve.** An agent (no web access) solves every task and writes the solutions, code and a report.
+3. **Slides.** A fresh agent turns the solutions into slides by filling in the slide template
+   (see [the templates](#the-slides-templates-you-can-change)), builds them and looks at the slide images to fix layout problems.
 
-1. Checks the PDF (exists, readable, not encrypted) and creates `sheet_solutions/` next to it (with the PDF, its text and one PNG per page in `source/`).
-2. A short agent run (`prompts/check_inputs.md`, log `check.log`) reads the sheet and writes `source/requirements.json`: every external file the tasks need (data sets, provided code), with the tasks that use it and where the sheet says to get it, plus every Python package the sheet expects that is not installed.
-3. The script then checks this list. It looks for files next to the PDF, anywhere in `sheet_data/` and in any `--data DIR`, and checks packages in `.venv`.
-4. If anything is missing it stops with exit code 2 and lists what is missing, which tasks need it and how to fix it. Nothing is solved yet. Rerun the same command once the inputs are there: the folder and the list are reused, so the check does not run again. If the list is wrong, edit `requirements.json`, or start over with `--force`.
+Each stage stops at once with the agent's error message if the agent fails.
 
-**Phase 2: solve. No human in the loop.**
+### Output
 
-5. All found files are copied into `data/`. Then a Claude Code agent (`claude -p`, no web access, `prompts/solve.md`) solves everything without asking questions, logging to `agent.log`. It writes:
-   - `exercises.md`: a list of every problem and task, with source pages
-   - `solutions/problem-X.md`: for each task: idea, step-by-step solution, result, check, pitfalls and takeaways
-   - `code/` and `figures/`: runnable Python, the saved output of each script (`code/*.out`) and the plots it makes
-   - `REPORT.md`: status per task (solved/partial/blocked), how it was checked, confidence, and open questions
-6. Exits with code 0 only if the agent finished and wrote `REPORT.md`.
+Everything goes to a new folder next to the PDF, `<sheet>_solutions/`:
 
-Options: `--model`, `--effort LEVEL` (low, medium, high, xhigh, max; applies to every agent run), `--data DIR` (repeatable), `--force` (start over), `--dry-run` (prepare the folder and print the prompt without starting an agent).
+| Path | Content |
+|---|---|
+| `slides/slides.pdf`, `slides/slides.tex` | the slides and their editable LaTeX source |
+| `slides/NOTES.md` | for the instructor: low-confidence tasks, open questions, what was simplified, slide number and type of each task |
+| `REPORT.md` | status (solved / partial / blocked) and confidence per task, how it was checked |
+| `exercises.md` | list of all problems and tasks, with page numbers |
+| `solutions/problem-*.md` | full worked solution per problem: idea, steps, result, check, pitfalls |
+| `code/`, `figures/` | the Python scripts, their saved output (`code/*.out`) and the plots |
+| `source/` | the sheet, its text, page images and the exact prompts that were used |
+| `check.log`, `agent.log`, `slides.log` | full agent logs |
 
-Setup: the script is `bin/auto_exercises`, symlinked into `~/.local/bin`. All agents use one Python environment, `.venv/` (Python 3.12; numpy, scipy, sympy, pandas, matplotlib, seaborn, scikit-learn, jax, torch, torchvision, CPU only; `csv` is built in). It is defined in `env/requirements.txt` and built by `bin/setup_env`. Agents never install packages: the input check complains about missing ones before solving, and a solver that still finds one missing marks the task `BLOCKED (missing package ...)` and lists it under **Missing dependencies** in `REPORT.md`. To add a package: append it to `env/requirements.txt` and run `bin/setup_env`.
+## The slides: templates you can change
 
+The look and the structure of the slides are defined in four files. Change them to fit your course; every new
+run (or `--slides-only`) picks up the changes.
 
-### Phase 3: slides
+| File | What it defines | Change it to ... |
+|---|---|---|
+| [`templates/slides/pattern.md`](templates/slides/pattern.md) | **which slides exist, in which order, and what each one says**, sentence by sentence | change how tasks are presented (see below) |
+| [`templates/slides/exslides.sty`](templates/slides/exslides.sty) | the look: Metropolis theme, fonts, colours, code style, the coloured stage labels | change the design. The agent never edits this file, so every deck looks the same |
+| [`templates/slides/slides.tex`](templates/slides/slides.tex) | an empty deck with one frame per kind of slide, showing only its layout (columns, tables, code, boxed result) | change the layout of a kind of slide, or add one for a new kind |
+| [`prompts/slides.md`](prompts/slides.md) | the rules for the slide agent that hold for every slide: about 8 lines per slide at most, nothing smaller than `\footnotesize`, every step explained in words, numbers taken from the solutions, images cut from the sheet, ... | change the general writing and layout rules |
 
-A fresh agent turns the solutions into slides by filling in one template deck:
+The stage labels (defined in `exslides.sty`) show on every slide where we are:
+`\Refresh` (refresher), `\Given` (recap), `\Byhand` (step 1), `\Algo` (step 2), `\Impl` (step 3), `\Answer` (question and answer).
 
-- `templates/slides/exslides.sty`: the look, i.e. the preamble of the hand-made reference deck
-  `reference/poml-ex-02/slides` (Metropolis theme, colour-coded stage labels `\Refresh`, `\Given`, `\Byhand`,
-  `\Algo`, `\Impl`, `\Answer`). Change the design only here.
-- `templates/slides/pattern.md`: the presentation pattern, the ONE place that defines which slides exist, in
-  which order, and what each says, line by line (deck: title, refresher, problems, takeaways; per problem
-  a recap (given, overview of the tasks); per task, in the sheet's order, its background, what is asked, then
-  its solution by task type: computation = by hand -> algorithm -> implementation (default),
-  question list = question, short answer, next question, ...). It is pasted into the slide agent's prompt as is.
-  To change how tasks are presented, edit only this file.
-- `templates/slides/slides.tex`: an empty deck in that style with one frame per kind of slide, showing only its layout.
-- `prompts/slides.md`: rules for the slide agent (one thought per slide, words for every step, numbers must
-  match the solutions, images from the sheet where the sheet shows them, doubts go to `NOTES.md`, never invent plots).
-- `bin/build_slides DIR`: builds `slides.pdf` (with reveal steps, for presenting); fails on LaTeX errors or leftover placeholders (`X.Y`, `<<...>>`).
+The other agents can be adapted the same way: `prompts/check_inputs.md` (input check) and `prompts/solve.md` (solver).
+The Python packages available to the solver are in `env/requirements.txt` (add one, then rerun `bin/setup_env`).
 
-Output: `<sheet>_solutions/slides/` with `slides.tex`, `slides.pdf`, `NOTES.md` (for the instructor).
-Remake only the slides of an already solved sheet: `auto_exercises sheet.pdf --slides-only`.
+### How `pattern.md` works
 
-Not built yet: independent checking of the solutions.
+`pattern.md` is pasted into the slide agent's prompt as it is, and the agent follows it exactly. It is written
+as plain sentences, one numbered line per slide, saying what the slide contains and in which order:
 
-## Input
+```markdown
+4. The algorithm slide gives the method as numbered steps in words, from input to output, and ends with the main pitfall.
+```
 
-The pipeline takes exactly one input: **one PDF file that contains all the exercises** (an exercise sheet).
+It has four parts:
 
-### File
+1. **The deck**: title slide, refresher, then each problem in sheet order, then the takeaways.
+2. **A problem's recap**: the Given slide (data, model, formulas), then an overview of its tasks.
+3. **A task**: first the background the sheet puts before it, then its solution.
+4. **Task types** (`## Task types`): the agent decides for each task which type it is and follows that type's pattern:
+   - `### Computation (the default)`: what is asked, then step 1 by hand (a toy example only if the real data is
+     too big or hides the point), step 2 algorithm, step 3 implementation, result and plot.
+   - `### Question list` (a task that only asks questions, e.g. "think about ..."): question, short answer,
+     next question, next answer, ...
 
-- Format: PDF (`.pdf`), one file per run.
-- Content: one exercise sheet, i.e. all exercises that the slides should cover.
-- The PDF is the only source of truth for the exercise statements. Nothing else (no solutions, no lecture notes) is required.
+### Adding a rule
+
+- **Change what a slide says**: edit its sentence. Write what the slide *contains*, in order, in full sentences
+  ("The result slide states the final answer in a box, then lists the independent checks.").
+- **A rule for some tasks only**: add a sentence with the condition and, ideally, an example with its reason:
+  "There is a toy slide only if the real data is too big to work through by hand or hides the point
+  (for example ...); otherwise ...". The agent applies the reason to other sheets, so the reason matters more than the example.
+- **A new task type**: add a block under `## Task types`, for example:
+
+  ```markdown
+  ### Proof
+
+  The task asks to prove a statement, with no data and no code.
+  1. The statement slide restates what is to be proven and names the assumptions.
+  2. The idea slide gives the proof strategy in one or two sentences.
+  3. The proof slides give the proof in numbered steps, one idea per slide, with every step explained in words.
+  4. The last slide says where each assumption was used.
+  ```
+
+  Start with a sentence saying **when** a task is of this type, so the agent can recognise it; then one line per slide.
+  If none of the types fits, the agent uses the default type.
+- **A new kind of slide** (a new layout): also add an empty example frame for it to `slides.tex`, with a comment
+  on its layout. A new stage label goes into `exslides.sty` (e.g. `\newcommand{\Proof}{\stage{hand}{Proof}}`)
+  and into the label list in `prompts/slides.md`.
+
+To try a change, remake the slides of a sheet that is already solved: `auto_exercises sheet.pdf --slides-only`
+(this replaces only `slides/`). `slides/NOTES.md` lists the type the agent chose for each task.
+
+## Repository layout
+
+```
+bin/auto_exercises     the pipeline (Python script)
+bin/build_slides DIR   compiles DIR/slides.tex, renders one image per slide, fails on errors or leftover placeholders
+bin/setup_env          builds .venv/ from env/requirements.txt
+env/requirements.txt   Python packages for the solver
+prompts/               the prompts of the three agents (check_inputs.md, solve.md, slides.md)
+templates/slides/      the slide templates (pattern.md, exslides.sty, slides.tex)
+```
+
+## Good to know
+
+- **Time and cost**: a full sheet takes a while (the slide stage alone is often 10+ minutes). For quick tests
+  use a short sheet, `--model sonnet` or `--effort low`.
+- **Agents never install packages.** A missing package is reported by the input check; a task that still needs
+  one is marked `BLOCKED` in `REPORT.md`.
+- **Check the results.** The solver checks its own work and reports its confidence per task, but there is no
+  independent check yet. Read `REPORT.md` and `slides/NOTES.md` before presenting.
+- The agents run with `--permission-mode bypassPermissions` (no permission prompts) inside the output folder, without web access.

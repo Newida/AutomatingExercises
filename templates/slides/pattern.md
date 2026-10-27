@@ -25,7 +25,7 @@ What is asked:
 1. The task slide restates the task faithfully in the sheet's notation: what must be computed, implemented or shown, with the given starting values, constraints and hints. If the task statement shows an image, it appears here. The last sentence says what the sheet warns about or expects to come out, if it does.
 
 Step 1, by hand:
-2. The first by-hand slide works through a toy version small enough to do on paper: it states the toy problem, does each step with the actual numbers, and ends with the subtle point the toy reveals ("Why ...?").
+2. The first by-hand slide works through a toy version small enough to do on paper: it states the toy problem, does each step with the actual numbers, and ends with the subtle point the toy reveals ("Why ...?"). There is a toy slide only if the real data is too big to work through by hand or hides the point (for example 1.1.1: the effect sits in the 10th decimal place, a 3-digit toy shows it). If the steps can be shown on the given data directly (for example 1.2.1: the rule tables are small already), there is no toy slide; the real-data slide then also ends with the subtle point.
 3. The second by-hand slide does the same steps on the real data: a table of the key numbers, then one or two sentences of sanity checks. For a math task, this is the full derivation in numbered steps, with every step explained in words.
 
 Step 2, algorithm:

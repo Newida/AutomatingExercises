@@ -2,7 +2,9 @@
 # Create or update the solver environment .venv/ from env/requirements.txt.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
-BASE="${PYTHON:-$HOME/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/bin/python3.12}"
+# base interpreter: $PYTHON, else python3.12 on PATH (e.g. installed with `uv python install 3.12`)
+BASE="${PYTHON:-$(command -v python3.12 || ls "$HOME"/.local/share/uv/python/cpython-3.12*/bin/python3.12 2>/dev/null | head -1)}"
+[ -n "$BASE" ] && [ -x "$BASE" ] || { echo "setup_env: no Python 3.12 found; install one or set PYTHON=/path/to/python3.12"; exit 1; }
 [ -x "$ROOT/.venv/bin/python" ] || "$BASE" -m venv "$ROOT/.venv"
 PIP="$ROOT/.venv/bin/python -m pip"
 $PIP install -q --upgrade pip
