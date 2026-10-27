@@ -8,6 +8,7 @@ PROMPT = ROOT / "prompts" / "solve.md"
 CHECK_PROMPT = ROOT / "prompts" / "check_inputs.md"
 SLIDES_PROMPT = ROOT / "prompts" / "slides.md"
 TEMPLATE = ROOT / "templates" / "slides"
+STYLES = ROOT / "styles"
 BUILD = ROOT / "bin" / "build_slides"
 WAITING = "WAITING_FOR_INPUTS"  # marker file: input check failed, folder may be reused
 VENV_PY = ROOT / ".venv" / "bin" / "python"
@@ -175,7 +176,20 @@ def check_inputs(out, pdf, data_dirs, model, effort):
     sys.exit(2)
 
 
-def make_slides(out, model, effort):
+def style_text(style):
+    """The personal style profile: a name in styles/, a path, or none."""
+    if style == "none":
+        return "No personal style is given: use a neutral, clear teaching style.\n"
+    f = Path(style).expanduser()
+    if not f.is_file():
+        f = STYLES / f"{style}.md"
+    if not f.is_file():
+        names = ", ".join(sorted(x.stem for x in STYLES.glob("*.md"))) or "none"
+        stop(f"no style {style!r} (styles: {names}; or a path to a .md file, or none)")
+    return f.read_text()
+
+
+def make_slides(out, model, effort, style):
     """Copy the slide template into out/slides, let an agent fill it, then build and check the PDF."""
     sl = out / "slides"
     if sl.exists():
@@ -184,7 +198,8 @@ def make_slides(out, model, effort):
     for f in ("slides.tex", "exslides.sty"):
         shutil.copy2(TEMPLATE / f, sl / f)
     prompt = (SLIDES_PROMPT.read_text().replace("{build}", str(BUILD))
-              .replace("{pattern}", (TEMPLATE / "pattern.md").read_text()))
+              .replace("{pattern}", (TEMPLATE / "pattern.md").read_text())
+              .replace("{style}", style_text(style)))
     (out / "source" / "slides_prompt.md").write_text(prompt)
     print("auto_exercises: making slides from the solutions (log in slides.log) ...")
     run_claude(out, prompt, model, effort, "slides.log")
@@ -205,6 +220,8 @@ def main():
     ap.add_argument("--model", help="Claude model (default: Claude Code's default)")
     ap.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"],
                     help="reasoning effort for every agent run (default: Claude Code's setting)")
+    ap.add_argument("--style", default="lukas", metavar="NAME",
+                    help="personal presentation style: a name in styles/ (default: lukas), a path to a .md file, or none")
     ap.add_argument("--force", action="store_true", help="replace an existing solution directory")
     ap.add_argument("--data", action="append", default=[], metavar="DIR",
                     help="extra folder to search for data files the sheet needs (repeatable)")
@@ -228,11 +245,12 @@ def main():
     if not a.dry_run and not shutil.which("claude"):
         stop("claude CLI not found on PATH")
 
+    style_text(a.style)  # unknown style: stop now, not after solving
     out = pdf.parent / f"{pdf.stem}_solutions"
     if a.slides_only:
         if not (out / "REPORT.md").exists():
             stop(f"{out} is not solved yet (no REPORT.md); run without --slides-only first")
-        make_slides(out, a.model, a.effort)
+        make_slides(out, a.model, a.effort, a.style)
         return
     n = prepare(pdf, out, a.force)
     prompt = PROMPT.read_text().replace("{python}", str(VENV_PY))
@@ -251,7 +269,7 @@ def main():
     if not (out / "REPORT.md").exists():
         stop(f"agent finished without REPORT.md; see {out / 'agent.log'}")
     print(f"auto_exercises: solved. Report: {out / 'REPORT.md'}")
-    make_slides(out, a.model, a.effort)
+    make_slides(out, a.model, a.effort, a.style)
     print(f"\nauto_exercises: done. Everything in {out}")
 
 

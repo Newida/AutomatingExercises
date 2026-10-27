@@ -25,11 +25,17 @@ You work inside the solution directory (your current working directory). Write o
 This defines which slides exist, in which order, and what each one says. Follow it exactly, for the deck and for every task.
 
 {pattern}
+
+## Personal style
+
+The instructor's personal style: write the slides in this voice, with this way of explaining and these emphases. It changes only the wording, tone and emphasis. Where it conflicts with the presentation pattern or the rules below, the pattern and the rules win. Never copy its examples onto the slides.
+
+{style}
 ## Rules for every slide
 
 - Every content frame starts with its stage label, as in the template: `\Refresh`, `\Given` (recap), `\Byhand`, `\Algo`, `\Impl`, `\Answer` (question-list tasks).
 - Images from the sheet (the pattern says on which slide; plots, diagrams, sketches, tables drawn as pictures) go next to the text in two columns as in the template's Given frame, with a small caption `{\footnotesize sheet, p.~P}`. Find the images by looking at `source/pages/page-*.png`, and cut each one out of the sheet: `mkdir -p slides/figures && pdftoppm -r 200 -png -f P -l P -x X -y Y -W W -H H -singlefile source/sheet.pdf slides/figures/sheet_pP_NAME` (X, Y, W, H in pixels at 200 dpi, i.e. the position on the page image times 200/110). Read the cropped PNG to check that it shows the whole image and nothing else, and include it with `\includegraphics[width=\linewidth]{sheet_pP_NAME.png}`.
-- Keep the template's frame titles (`X.Y.Z -- algorithm`, ...) with the real numbers.
+- Keep the template's frame titles (`X.Y.Z -- algorithm`, ...) with the real numbers. A short addition after a colon is allowed (`X.Y.Z -- by hand: the real data`).
 - One thought per slide. At most about 8 lines of text or 3 display formulas per slide; split long derivations over several slides (`X.Y.Z -- by hand (2/3)`). Never smaller than `\footnotesize`. `\pause` only where revealing a step really helps.
 - Explain every step in words before or after the formula. A student must be able to follow without a speaker.
 - Use the sheet's notation, numbering and equation numbers.

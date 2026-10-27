@@ -49,6 +49,7 @@ auto_exercises --help
 |---|---|
 | `--model MODEL` | Claude model for every agent (default: Claude Code's default) |
 | `--effort LEVEL` | `low`, `medium`, `high`, `xhigh`, `max`: reasoning effort for every agent. If the model does not support it, the run stops at once with the agent's error |
+| `--style NAME` | personal presentation style: `styles/NAME.md` (default: `lukas`), a path to a `.md` file, or `none` (see [Your personal style](#your-personal-style)) |
 | `--data DIR` | extra folder to search for data files the sheet needs (repeatable) |
 | `--slides-only` | keep the solutions, only redo the slides (use this after changing the slide templates) |
 | `--force` | delete an existing `<sheet>_solutions/` folder and start over |
@@ -85,7 +86,7 @@ Everything goes to a new folder next to the PDF, `<sheet>_solutions/`:
 
 ## The slides: templates you can change
 
-The look and the structure of the slides are defined in four files. Change them to fit your course; every new
+The look and the structure of the slides are defined in four files, plus your personal style (next section). Change them to fit your course; every new
 run (or `--slides-only`) picks up the changes.
 
 | File | What it defines | Change it to ... |
@@ -149,6 +150,24 @@ It has four parts:
 To try a change, remake the slides of a sheet that is already solved: `auto_exercises sheet.pdf --slides-only`
 (this replaces only `slides/`). `slides/NOTES.md` lists the type the agent chose for each task.
 
+## Your personal style
+
+The pattern says *which* slides there are; a style profile in `styles/` says *how* they are written: the
+voice, how things are explained, what is always stressed, phrases to use and to avoid. It is pasted into
+the slide agent's prompt after the pattern. It only changes wording, tone and emphasis; where it conflicts
+with the pattern or the slide rules, those win.
+
+`styles/lukas.md` is the default. To use your own:
+
+1. Copy it: `cp styles/lukas.md styles/yourname.md`, and rewrite each section for yourself
+   (Voice, How I explain, What I always stress, Emphasis and look, Phrases I use, Never).
+2. Add a few lines of your own writing at the end (a blog post, slides, an email to students). Examples are the
+   strongest signal for the agent. Take them from **other topics** than the sheets, so the agent copies the style, not the content.
+3. Run with `--style yourname` (or `--style path/to/file.md`). To make it your default, change `default="lukas"`
+   of `--style` in `bin/auto_exercises`. `--style none` gives a neutral style.
+
+Try it on a solved sheet with `--slides-only --style yourname`.
+
 ## Repository layout
 
 ```
@@ -158,6 +177,7 @@ bin/setup_env          builds .venv/ from env/requirements.txt
 env/requirements.txt   Python packages for the solver
 prompts/               the prompts of the three agents (check_inputs.md, solve.md, slides.md)
 templates/slides/      the slide templates (pattern.md, exslides.sty, slides.tex)
+styles/                personal presentation styles (lukas.md, ...)
 ```
 
 ## Good to know
