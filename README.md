@@ -1,4 +1,4 @@
-# automatingExercises
+# AutomatingExercises
 
 Turn an exercise sheet (PDF) into solution slides with one command.
 
@@ -27,8 +27,8 @@ Linux (or macOS) with:
 Then:
 
 ```bash
-git clone <this repo> automatingExercises
-cd automatingExercises
+git clone <this repo> AutomatingExercises
+cd AutomatingExercises
 bin/setup_env                      # builds .venv/ from env/requirements.txt (a few GB: torch, jax)
 ln -s "$PWD/bin/auto_exercises" ~/.local/bin/auto_exercises   # optional: call it from anywhere
 ```
