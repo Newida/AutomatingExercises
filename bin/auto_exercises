@@ -122,13 +122,27 @@ def find_file(name, dirs):
     return None
 
 
+def available_files(pdf, dirs):
+    """Markdown list of the files find_file can see (except the sheet itself), for the check agent."""
+    lines = []
+    for d, deep in dirs:
+        if not d.is_dir():
+            continue
+        for f in sorted(d.rglob("*") if deep else d.iterdir()):
+            if f.is_file() and f != pdf:
+                lines.append(f"- `{f.name}` ({f.relative_to(d.parent)})")
+    return "\n".join(lines) or "(none)"
+
+
 def check_inputs(out, pdf, data_dirs, model, effort):
     """Ask an agent what the sheet needs, then check it is all there. Stops (exit 2) with a list if not."""
     req_file = out / "source" / "requirements.json"
+    dirs = [(pdf.parent, False), (pdf.parent / f"{pdf.stem}_data", True)] + [(d, True) for d in data_dirs]
     if not req_file.exists():
         print("auto_exercises: checking what the sheet needs (data files, packages) ...")
         prompt = (CHECK_PROMPT.read_text().replace("{python}", str(VENV_PY))
-                  .replace("{packages}", ", ".join(installed_packages())))
+                  .replace("{packages}", ", ".join(installed_packages()))
+                  .replace("{available}", available_files(pdf, dirs)))
         run_claude(out, prompt, model, effort, "check.log")
         if not req_file.exists():
             stop(f"input check failed (no requirements.json); see {out / 'check.log'}")
@@ -138,7 +152,6 @@ def check_inputs(out, pdf, data_dirs, model, effort):
     except (json.JSONDecodeError, AttributeError) as e:
         stop(f"bad {req_file}: {e}")
 
-    dirs = [(pdf.parent, False), (pdf.parent / f"{pdf.stem}_data", True)] + [(d, True) for d in data_dirs]
     found, missing = {}, []
     for f in files:
         hit = find_file(f["name"], dirs)
