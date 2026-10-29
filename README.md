@@ -6,7 +6,7 @@ Turn an exercise sheet (PDF) into solution slides with one command.
 auto_exercises sheet03.pdf
 ```
 
-Claude Code agents read the sheet, solve every task (with runnable Python code and plots) and then make a
+AI agents (Claude Code, or OpenAI Codex with `--agent codex`) read the sheet, solve every task (with runnable Python code and plots) and then make a
 Beamer slide deck that you can present in the exercise class and that students can follow on their own.
 There is no human in the loop once the inputs are complete.
 
@@ -19,7 +19,8 @@ Linux (or macOS) with:
 
 | Needed | For | Install (Debian/Ubuntu) |
 |---|---|---|
-| [Claude Code](https://claude.com/claude-code) CLI `claude`, logged in | the agents | `npm install -g @anthropic-ai/claude-code`, then run `claude` once to log in |
+| [Claude Code](https://claude.com/claude-code) CLI `claude`, logged in | the agents (default) | `npm install -g @anthropic-ai/claude-code`, then run `claude` once to log in |
+| or [Codex](https://github.com/openai/codex) CLI `codex`, logged in | the agents with `--agent codex` | `npm install -g @openai/codex`, then run `codex` once to log in |
 | Python 3.12 | the solver environment | `uv python install 3.12` (or your system's `python3.12`) |
 | poppler (`pdftotext`, `pdftoppm`, `pdfinfo`) | reading the sheet, page images | `sudo apt install poppler-utils` |
 | `pdflatex` with beamer, the metropolis theme, lmodern, listings, booktabs | building the slides | `sudo apt install texlive-latex-extra texlive-fonts-recommended lmodern` |
@@ -42,12 +43,14 @@ auto_exercises path/to/sheet.pdf                      # full run: check inputs, 
 auto_exercises sheet.pdf --data ~/datasets            # extra folder to look for data files (repeatable)
 auto_exercises sheet.pdf --slides-only                # only remake the slides of an already solved sheet
 auto_exercises sheet.pdf --model sonnet --effort low  # cheaper / faster agents
+auto_exercises sheet.pdf --agent codex                # use OpenAI Codex instead of Claude Code
 auto_exercises --help
 ```
 
 | Option | Meaning |
 |---|---|
-| `--model MODEL` | Claude model for every agent (default: Claude Code's default) |
+| `--agent NAME` | `claude` (Claude Code, default) or `codex` (OpenAI Codex): the agent CLI for every stage |
+| `--model MODEL` | model for every agent, a name the chosen agent knows (e.g. `sonnet` for Claude Code); default: the agent's own default |
 | `--effort LEVEL` | `low`, `medium`, `high`, `xhigh`, `max`: reasoning effort for every agent. If the model does not support it, the run stops at once with the agent's error |
 | `--style NAME` | personal presentation style: `styles/NAME.md` (default: `lukas`), a path to a `.md` file, or `none` (see [Your personal style](#your-personal-style)) |
 | `--data DIR` | extra folder to search for data files the sheet needs (repeatable) |
@@ -63,7 +66,7 @@ Data files the sheet refers to (CSV files, provided code) are looked for next to
 1. **Check inputs.** An agent reads the sheet and lists every data file and Python package it needs
    (`source/requirements.json`). If something is missing, the script stops with exit code 2 and says what is
    missing, which tasks need it and how to fix it. Add the files and rerun the same command; the check is not repeated.
-2. **Solve.** An agent (no web access) solves every task and writes the solutions, code and a report.
+2. **Solve.** An agent (no web access with Claude Code) solves every task and writes the solutions, code and a report.
 3. **Slides.** A fresh agent turns the solutions into slides by filling in the slide template
    (see [the templates](#the-slides-templates-you-can-change)), builds them and looks at the slide images to fix layout problems.
 
@@ -188,4 +191,5 @@ styles/                personal presentation styles (lukas.md, ...)
   one is marked `BLOCKED` in `REPORT.md`.
 - **Check the results.** The solver checks its own work and reports its confidence per task, but there is no
   independent check yet. Read `REPORT.md` and `slides/NOTES.md` before presenting.
-- The agents run with `--permission-mode bypassPermissions` (no permission prompts) inside the output folder, without web access.
+- The agents run inside the output folder with no permission prompts: Claude Code with `--permission-mode bypassPermissions`
+  and without web access, Codex with `--dangerously-bypass-approvals-and-sandbox` (web access is left as in your Codex config).
