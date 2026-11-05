@@ -76,16 +76,16 @@ Each stage stops at once with the agent's error message if the agent fails.
 
 Everything goes to a new folder next to the PDF, `<sheet>_solutions/`:
 
-| Path | Content |
-|---|---|
-| `slides/slides.pdf`, `slides/slides.tex` | the slides and their editable LaTeX source |
-| `slides/NOTES.md` | for the instructor: low-confidence tasks, open questions, what was simplified, slide number and type of each task |
-| `REPORT.md` | status (solved / partial / blocked) and confidence per task, how it was checked |
-| `exercises.md` | list of all problems and tasks, with page numbers |
-| `solutions/problem-*.md` | full worked solution per problem: idea, steps, result, check, pitfalls |
-| `code/`, `figures/` | the Python scripts, their saved output (`code/*.out`) and the plots |
-| `source/` | the sheet, its text, page images and the exact prompts that were used |
-| `check.log`, `agent.log`, `slides.log` | full agent logs |
+| Path                                     | Content                                                                                                           |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `slides/slides.pdf`, `slides/slides.tex` | the slides and their editable LaTeX source                                                                        |
+| `slides/NOTES.md`                        | for the instructor: low-confidence tasks, open questions, what was simplified, slide number and type of each task |
+| `REPORT.md`                              | status (solved / partial / blocked) and confidence per task, how it was checked                                   |
+| `exercises.md`                           | list of all problems and tasks, with page numbers                                                                 |
+| `solutions/problem-*.md`                 | full worked solution per problem: idea, steps, result, check, pitfalls                                            |
+| `code/`, `figures/`                      | the Python scripts, their saved output (`code/*.out`) and the plots                                               |
+| `source/`                                | the sheet, its text, page images and the exact prompts that were used                                             |
+| `check.log`, `agent.log`, `slides.log`   | full agent logs                                                                                                   |
 
 ## The slides: templates you can change
 
@@ -122,6 +122,8 @@ It has four parts:
 4. **Task types** (`## Task types`): the agent decides for each task which type it is and follows that type's pattern:
    - `### Computation (the default)`: what is asked, then step 1 by hand (a toy example only if the real data is
      too big or hides the point), step 2 algorithm, step 3 implementation, result and plot.
+   - `### Proof` (a task that asks to prove a statement): what is asked, then only step 1 by hand, with every
+     formula and calculation written out (no algorithm, implementation or checks).
    - `### Question list` (a task that only asks questions, e.g. "think about ..."): question, short answer,
      next question, next answer, ...
 

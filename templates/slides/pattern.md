@@ -15,6 +15,8 @@ A task follows the sheet: first the background the sheet puts before it, then it
 Background (for every type; only if the sheet puts background info between the previous task and this one; one slide per idea):
 1. Each background slide starts with the question it answers (for example "why this model?"), then gives the sheet's reasoning in short steps, and ends with what this means for the task. Formulas keep the sheet's equation numbers. If the sheet shows an image with this background, it appears on this slide.
 
+Every slide stands on its own (for every slide of the deck): a slide never refers to an equation, formula or result on another slide ("by (2) on the slide before", "see the formula above", "as shown in step 3 of the previous slide"). If a slide uses a formula that was shown on an earlier slide, it writes the formula out again on this slide, with the sheet's equation number if it has one, and then uses it. The same holds for definitions: a symbol that is used is defined again in one phrase if it was introduced on another slide. The sheet's equation numbers only label a formula that is shown on the slide itself; they never replace it.
+
 ## Task types
 
 ### Computation (the default)
@@ -37,6 +39,18 @@ Step 3, implementation:
 7. If the task has a plot, a plot slide shows it full width with one or two sentences on what to look at.
 
 Finally, if the sheet compares methods or results with an earlier task, a comparison slide puts them side by side in a table and ends with a one-sentence conclusion.
+
+### Proof
+
+The task asks to prove a statement (a theorem, an identity, an inequality) and nothing is implemented. There is only one step, by hand. There is no algorithm slide, no implementation slide, no code check and no separate result slide.
+
+What is asked:
+1. The task slide restates the statement faithfully in the sheet's notation: the assumptions, the claim and the sheet's equation numbers. If the sheet allows any proof technique, the last sentence names the technique chosen.
+
+Step 1, by hand (the whole proof):
+2. The by-hand slides give the proof in numbered steps, one idea per slide, at most five steps per slide. The slide titles are numbered "by hand (k/m)". Nothing is skipped: every formula and every calculation is written out, and every step gets one sentence in words that says what it does and why it holds. "Clearly", "similarly" and "and so on" are not allowed. Examples of what "written out" means: the system of $n$ equations is written down row by row from the sheet's formula, then in matrix form with its entries; what row $j$ of a matrix product says is written as its own equation; a list of $n$ conditions is shown as the list $p(x_1)=0,\dots,p(x_n)=0$, not as "for all $j$"; a repeated argument is carried out for the first two cases before it is stated for all.
+3. The proof follows this order: first rewrite the statement in a form that can be attacked, then reduce it to what remains to show and state that in an alert line, then prove it, then conclude. Facts that the proof uses (for example "a nonzero polynomial of degree $\le n-1$ has at most $n-1$ roots") are named, and a fact is proved on the slide if its proof takes only a few lines.
+4. The last by-hand slide states the conclusion in a box, ends the proof with $\square$, and says in one sentence where each assumption was used (the "trick").
 
 ### Question list
 
