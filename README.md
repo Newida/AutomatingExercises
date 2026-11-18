@@ -183,6 +183,7 @@ env/requirements.txt   Python packages for the solver
 prompts/               the prompts of the three agents (check_inputs.md, solve.md, slides.md)
 templates/slides/      the slide templates (pattern.md, exslides.sty, slides.tex)
 styles/                personal presentation styles (lukas.md, ...)
+sheets/<course>/        your sheets, their data files and <sheet>_solutions/ (git-ignored)
 ```
 
 ## Good to know
