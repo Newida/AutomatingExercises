@@ -1,9 +1,8 @@
 The deck presents the sheet in this order:
 
 1. The title slide names the exercise sheet, the problems covered and the course. There is no roadmap or agenda slide.
-2. The refresher (only if the sheet assumes background students may lack) explains one concept per slide: first the setting, then the definition with its formula, then the key property in words, and finally a common misunderstanding.
-3. Then comes each problem in sheet order: first its recap, then each of its tasks.
-4. The last slide states the takeaways: one line per lesson of the sheet.
+2. Then comes each problem in sheet order: first its recap, then each of its tasks. There is no refresher of background knowledge.
+3. The last slide states the takeaways: one line per lesson of the sheet.
 
 A problem's recap (before its tasks; everything comes from the sheet, nothing is solved yet):
 
@@ -42,7 +41,7 @@ Finally, if the sheet compares methods or results with an earlier task, a compar
 
 ### Proof
 
-The task asks to prove a statement (a theorem, an identity, an inequality) and nothing is implemented. There is only one step, by hand. There is no algorithm slide, no implementation slide, no code check and no separate result slide.
+The task asks to prove a statement (a theorem, an identity, an inequality) and nothing is implemented. There is only one step, by hand. There is no toy-example slide, no algorithm slide, no implementation slide, no code check and no separate result slide. If a small case shows why an assumption is needed (for example two points with equal $x$), say so in one or two sentences on the task slide.
 
 What is asked:
 1. The task slide restates the statement faithfully in the sheet's notation: the assumptions, the claim and the sheet's equation numbers. If the sheet allows any proof technique, the last sentence names the technique chosen.
@@ -51,6 +50,18 @@ Step 1, by hand (the whole proof):
 2. The by-hand slides give the proof in numbered steps, one idea per slide, at most five steps per slide. The slide titles are numbered "by hand (k/m)". Nothing is skipped: every formula and every calculation is written out, and every step gets one sentence in words that says what it does and why it holds. "Clearly", "similarly" and "and so on" are not allowed. Examples of what "written out" means: the system of $n$ equations is written down row by row from the sheet's formula, then in matrix form with its entries; what row $j$ of a matrix product says is written as its own equation; a list of $n$ conditions is shown as the list $p(x_1)=0,\dots,p(x_n)=0$, not as "for all $j$"; a repeated argument is carried out for the first two cases before it is stated for all.
 3. The proof follows this order: first rewrite the statement in a form that can be attacked, then reduce it to what remains to show and state that in an alert line, then prove it, then conclude. Facts that the proof uses (for example "a nonzero polynomial of degree $\le n-1$ has at most $n-1$ roots") are named, and a fact is proved on the slide if its proof takes only a few lines.
 4. The last by-hand slide states the conclusion in a box, ends the proof with $\square$, and says in one sentence where each assumption was used (the "trick").
+
+### Implementation
+
+The task only asks to write code (a function, a plot, a script) and there is nothing to derive or work out by hand. There is only step 3, implementation. There is no by-hand slide and no algorithm slide.
+
+What is asked:
+1. The task slide restates the task faithfully: what the code must do, its inputs and options, and the sheet's hints. If the task statement shows an image, it appears here.
+
+Step 3, implementation:
+2. The implementation slide shows the essential lines of code, its output or figure next to them, and one short note per non-obvious line.
+3. The result slide states what was built in a box, then lists the checks that show it works (for example: it reproduces the sheet's figures).
+4. If the code produces plots, a plot slide shows them full width with one or two sentences on what to look at.
 
 ### Question list
 

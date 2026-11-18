@@ -100,7 +100,7 @@ run (or `--slides-only`) picks up the changes.
 | [`prompts/slides.md`](prompts/slides.md) | the rules for the slide agent that hold for every slide: about 8 lines per slide at most, nothing smaller than `\footnotesize`, every step explained in words, numbers taken from the solutions, images cut from the sheet, ... | change the general writing and layout rules |
 
 The stage labels (defined in `exslides.sty`) show on every slide where we are:
-`\Refresh` (refresher), `\Given` (recap), `\Byhand` (step 1), `\Algo` (step 2), `\Impl` (step 3), `\Answer` (question and answer).
+`\Given` (recap), `\Byhand` (step 1), `\Algo` (step 2), `\Impl` (step 3), `\Answer` (question and answer).
 
 The other agents can be adapted the same way: `prompts/check_inputs.md` (input check) and `prompts/solve.md` (solver).
 The Python packages available to the solver are in `env/requirements.txt` (add one, then rerun `bin/setup_env`).
@@ -116,7 +116,7 @@ as plain sentences, one numbered line per slide, saying what the slide contains 
 
 It has four parts:
 
-1. **The deck**: title slide, refresher, then each problem in sheet order, then the takeaways.
+1. **The deck**: title slide, then each problem (no refresher) in sheet order, then the takeaways.
 2. **A problem's recap**: the Given slide (data, model, formulas), then an overview of its tasks.
 3. **A task**: first the background the sheet puts before it, then its solution.
 4. **Task types** (`## Task types`): the agent decides for each task which type it is and follows that type's pattern:
@@ -124,6 +124,8 @@ It has four parts:
      too big or hides the point), step 2 algorithm, step 3 implementation, result and plot.
    - `### Proof` (a task that asks to prove a statement): what is asked, then only step 1 by hand, with every
      formula and calculation written out (no algorithm, implementation or checks).
+   - `### Implementation` (a task that only asks for code, e.g. a plotting function): what is asked, then only
+     step 3: code with its output, result with checks, plots (no by-hand or algorithm slide).
    - `### Question list` (a task that only asks questions, e.g. "think about ..."): question, short answer,
      next question, next answer, ...
 
