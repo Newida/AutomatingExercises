@@ -28,6 +28,7 @@ What is asked:
 Step 1, by hand:
 2. The first by-hand slide works through a toy version small enough to do on paper: it states the toy problem, does each step with the actual numbers, and ends with the subtle point the toy reveals ("Why ...?"). There is a toy slide only if the real data is too big to work through by hand or hides the point (for example 1.1.1: the effect sits in the 10th decimal place, a 3-digit toy shows it). If the steps can be shown on the given data directly (for example 1.2.1: the rule tables are small already), there is no toy slide; the real-data slide then also ends with the subtle point.
 3. The second by-hand slide does the same steps on the real data: a table of the key numbers, then one or two sentences of sanity checks. For a math task, this is the full derivation in numbered steps, with every step explained in words.
+   If the task fixes or improves an earlier method, this table compares before vs after (old method vs new) side by side.
 
 Step 2, algorithm:
 4. The algorithm slide gives the method as numbered steps in words, from input to output, and ends with the main pitfall.
@@ -57,6 +58,7 @@ The task only asks to write code (a function, a plot, a script) and there is not
 
 What is asked:
 1. The task slide restates the task faithfully: what the code must do, its inputs and options, and the sheet's hints. If the task statement shows an image, it appears here.
+   A task that only says "run this snippet and convince yourself" is an Implementation task with a single implementation slide: it shows the data before vs after (numbers and a figure) and ends with the check in one sentence; no result or plot slide.
 
 Step 3, implementation:
 2. The implementation slide shows the essential lines of code, its output or figure next to them, and one short note per non-obvious line.
@@ -68,6 +70,7 @@ Step 3, implementation:
 The task is only a list of questions (for example "think about the meaning behind all this" followed by bullet points), with no new computation, code or derivation asked for. A question may ask what one finds by hand or by computer; its answer then uses the results of the earlier tasks and the solution. There is no "what is asked" slide and there are no steps; the questions themselves are the slides, in sheet order:
 1. A question slide first repeats the question as the sheet asks it, numbered in sheet order (or with the sheet's label, if it has one).
 2. Then it gives the short answer: the answer itself in one sentence, then the one reason, formula, example or earlier result that supports it, at most three sentences in total.
+   A "why does it fail / why does it work" answer never stops at a summary number ("the condition number is bad"): it names each concrete mechanism with its numbers (here: integer overflow, collinear columns, squared condition number) and restates the earlier failure on this slide; a small table (cause | fix) may replace the three sentences.
 3. The next question follows on the next slide, in the same way. Questions whose answer fits in one line may share a slide, at most three per slide.
 
 "Think about" questions, mini exercises and overarching questions are tasks too: choose their type the same way.
